@@ -1,0 +1,22 @@
+<ng-template #sidebar let-offcanvas>
+  <div class="offcanvas-header">
+    <h4 class="offcanvas-title">Cauldron</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+  </div>
+  <div class="offcanvas-body">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link" href="/details">Differential analysis</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link">PCA</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link">Data Management</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link">Settings</a>
+      </li>
+    </ul>
+  </div>
+</ng-template>

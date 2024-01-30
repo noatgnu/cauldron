@@ -1,0 +1,14 @@
+<div class="container">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <div class="form-floating mb-2">
+        <input id="resultFolder" readonly type="text" class="form-control" formControlName="resultStoragePath">
+        <label for="resultFolder">Result Folder</label>
+      </div>
+      <div>
+        <button class="btn btn-primary" (click)="handleClick($event)">Select Folder</button>
+      </div>
+
+    </div>
+  </form>
+</div>

@@ -1,0 +1,21 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top d-lex flex-wrap">
+  <div class="container-fluid">
+    <div class="d-flex gap-2 p-2 justify-content-between" style="width: 100%">
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-light" id="sidebarCollapse" (click)="sidebarStatus=!sidebarStatus">
+          <i class="bi bi-layout-sidebar"></i>
+        </button>
+      </div>
+      <div class="d-flex">
+        <div display="dynamic" ngbDropdown class="d-inline-block">
+          <button class="btn btn-outline-light" id="dropdownBasic1" ngbDropdownToggle><i class="bi bi-people"></i></button>
+          <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+            <a ngbDropdownItem href="#">Profile</a>
+            <a ngbDropdownItem href="#">Settings</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<app-sidebar [open]="sidebarStatus" (openChange)="sidebarStatus=$event"></app-sidebar>

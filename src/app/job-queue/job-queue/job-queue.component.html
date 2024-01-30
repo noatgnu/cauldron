@@ -1,0 +1,74 @@
+<div class="container-fluid p-0" style="height: 100%">
+  <div class="d-flex g-1" style="height: 100%">
+    <div class="border-end border-1 border-black d-flex flex-column" style="height: 100%; width: 300px; min-width: 300px">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex flex-wrap text-light">
+        <div class="container-fluid">
+          <div class="navbar-brand">Job Queue</div>
+          <div class="d-flex justify-content-end flex-row gap-1">
+          </div>
+        </div>
+      </nav>
+      <div class="list-group d-flex flex-column rounded-0">
+        @for(j of Object.keys(jobMap); track j) {
+          <div (click)="clickedJob=jobMap[j].job" [ngClass]="{'list-group-item': true, 'd-flex': true}">
+            @if (clickedJob==jobMap[j].job) {
+              <div style="width: 10px" class="bg-warning"></div>
+            }
+            <div [ngClass]="{'bg-danger': jobMap[j].error, 'bg-success': jobMap[j].completed, 'text-light': jobMap[j].completed||jobMap[j].error}">
+              <div>Type: {{jobMap[j].job.type}}</div>
+              <div>ID: {{jobMap[j].job.id}}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    <div class="d-flex flex-column border-black w-100" style="height: 100%">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex flex-wrap text-light">
+        <div class="container-fluid">
+          <div class="navbar-brand">Job Details</div>
+        </div>
+      </nav>
+      @if (clickedJob) {
+        <div class="container p-5">
+          <p><b>Job Type</b>: {{getJobData(clickedJob)['type']}}</p>
+          <p><b>Job State</b>: {{clickedJob.state}}</p>
+          <p><b>Job Queue</b>: {{clickedJob.type}}</p>
+          <p><b>Job ID</b>: {{clickedJob.id}}</p>
+          <p><b>Job Started At</b>: {{clickedJob.startedAt}}</p>
+          <p><b>Job Completed At</b>: {{clickedJob.completedAt}}</p>
+          <p><b>Job Duration</b>: {{clickedJob.duration}}</p>
+          <p><b>Job Failed At</b>: {{clickedJob.failedAt}}</p>
+          @if (jobMap[clickedJob.id].completed) {
+            <p><b>Job Result Location</b>: <i class="bi bi-folder" (click)="openFileExplorerAt(clickedJob.id)"></i></p>
+          }
+          @if (clickedJob.progress) {
+
+            @if (!jobMap[clickedJob.id].completed && !jobMap[clickedJob.id].error) {
+              <ngb-progressbar [value]="clickedJob.progress" type="primary"></ngb-progressbar>
+            } @else {
+              @if (jobMap[clickedJob.id].error) {
+                <ngb-progressbar [value]="100" type="danger"></ngb-progressbar>
+              } @else if (jobMap[clickedJob.id].completed) {
+                <ngb-progressbar [value]="100" type="success"></ngb-progressbar>
+              } @else {
+                <ngb-progressbar [value]="100" type="primary"></ngb-progressbar>
+              }
+            }
+
+          }
+
+        </div>
+      } @else {
+        <div class="border-dark border-opacity-25 rounded-3 d-flex justify-content-center align-items-center"
+             style="border-style: dashed; height: 100%">
+          <div class="p-5">
+            <p>
+              Select a job
+            </p>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

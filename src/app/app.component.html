@@ -1,0 +1,25 @@
+<div class="container-fluid d-flex flex-row p-0 m-0 w-100 h-100">
+  <div ngbNav #nav="ngbNav" [(activeId)]="active"
+       class="flex-column"
+       orientation="vertical"
+       style="background-color: #000000;
+       width: 50px">
+    <a class="nav-link" ngbNavItem="home" routerLink="/home" routerLinkActive="active"><i class="bi bi-house"></i></a>
+    <a ngbNavItem="job-queue" class="nav-link position-relative" routerLink="/job-queue" routerLinkActive="active">
+      <i class="bi bi-list-task">
+        <span class="position-absolute bottom-10 end-80 translate-middle badge rounded-pill bg-primary" style="font-size: 5pt">
+          {{jobQueue.processingCount}}
+        </span>
+      </i>
+    </a>
+    <a ngbNavItem="settings" class="nav-link" routerLink="/settings" routerLinkActive="active"><i class="bi bi-gear"></i></a>
+    <a ngbNavItem="about" class="nav-link" routerLink="/about" routerLinkActive="active"><i class="bi bi-link"></i></a>
+
+
+  </div>
+  <div class="flex-grow-1 w-100">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<app-toast-container></app-toast-container>

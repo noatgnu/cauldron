@@ -1,0 +1,66 @@
+{
+  "appId": "info.proteo.${name}",
+  "asar": true,
+  "directories": {
+    "output": "release/"
+  },
+  "files": [
+    "**/*",
+    "!**/*.ts",
+    "!*.map",
+    "!package.json",
+    "!package-lock.json",
+    {
+      "from": "../dist",
+      "filter": ["**/*"]
+    }
+
+  ],
+  "extraResources": [
+    {
+      "from": "./app/bin/${os}/python",
+      "to": "./bin/${os}/python",
+      "filter": [
+        "**/*"
+      ]
+    },
+    {
+      "from": "./app/requirements.txt",
+      "to": "./requirements.txt"
+    },
+    {
+      "from": "./scripts",
+      "to": "./scripts",
+      "filter": [
+        "**/*"
+      ]
+    }
+  ],
+  "win": {
+    "icon": "dist/assets/icons/favicon.ico",
+    "target": [
+      "portable"
+    ],
+    "signAndEditExecutable": true,
+    "publisherName": [
+      "Toan Phung",
+      "University of Dundee"
+    ]
+  },
+
+  "portable": {
+    "splashImage": "dist/assets/icons/electron.bmp"
+  },
+  "mac": {
+    "icon": "dist/assets/icons",
+    "target": [
+      "dmg"
+    ]
+  },
+  "linux": {
+    "icon": "dist/assets/icons",
+    "target": [
+      "AppImage"
+    ]
+  }
+}
