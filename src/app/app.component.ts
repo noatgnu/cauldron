@@ -1,8 +1,20 @@
-import { Component } from '@angular/core';
+import {Component, HostListener, NgZone} from '@angular/core';
 import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
 import {JobQueueService} from "./job-queue/job-queue.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ImputationModalComponent} from "./modals/imputation-modal/imputation-modal.component";
+import {
+  ProtocolIoCitationExportModalComponent
+} from "./modals/protocol-io-citation-export-modal/protocol-io-citation-export-modal.component";
+import {NormalizationModalComponent} from "./modals/normalization-modal/normalization-modal.component";
+import {PhateModalComponent} from "./modals/phate-modal/phate-modal.component";
+import {PcaModalComponent} from "./modals/pca-modal/pca-modal.component";
+import {DiannToCurtainptmModalComponent} from "./modals/diann-to-curtainptm-modal/diann-to-curtainptm-modal.component";
+import {
+  MsfraggerToCurtainptmModalComponent
+} from "./modals/msfragger-to-curtainptm-modal/msfragger-to-curtainptm-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -16,6 +28,9 @@ export class AppComponent {
     private electronService: ElectronService,
     private translate: TranslateService,
     public jobQueue: JobQueueService,
+    private modal: NgbModal,
+    private zone: NgZone,
+    private jobQueueService: JobQueueService
   ) {
     this.translate.setDefaultLang('en');
     console.log('APP_CONFIG', APP_CONFIG);
@@ -25,6 +40,125 @@ export class AppComponent {
       console.log('Run in electron');
       console.log('Electron ipcRenderer', this.electronService.ipcRenderer);
       console.log('NodeJS childProcess', this.electronService.childProcess);
+      this.electronService.dataTransformationChannelSubject.asObservable().subscribe((data) => {
+        console.log(data)
+        switch (data) {
+          case "impute-missing-values":
+            zone.run(() => {
+              const ref = this.modal.open(ImputationModalComponent, {scrollable: true})
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'data-transformation', data:{
+                    file_path: result.file_path,
+                    method: result.method,
+                    k: result.k,
+                    strategy: result.strategy,
+                    fillValue: result.fillValue,
+                    iterations: result.iterations,
+                    columns: result.columns,
+                    type: 'impute-missing-values'
+                  }})
+              })
+            })
+            break;
+          case "normalize-data":
+            zone.run(() => {
+              const ref = this.modal.open(NormalizationModalComponent, {scrollable: true})
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'data-transformation', data:{
+                  file_path: result.file_path,
+                    columns_name: result.columns_name,
+                    scaler_type: result.scaler_type,
+                    with_centering: result.with_centering,
+                    with_scaling: result.with_scaling,
+                    n_quantiles: result.n_quantiles,
+                    output_distribution: result.output_distribution,
+                    norm: result.norm,
+                    power_method: result.power_method,
+                    type: 'normalize-data'
+                  }})
+              })
+            })
+            break;
+        }
+      })
+      this.electronService.citationUtilityChannelSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'generate-ris-citation':
+            zone.run(() =>{
+              const ref = this.modal.open(ProtocolIoCitationExportModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'citation-utility', data:{
+                    idList: result.idList,
+                    type: 'generate-ris-citation'
+                  }})
+              })
+            })
+        }
+      })
+      this.electronService.dimensionReductionChannelSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'pca':
+            zone.run(() => {
+              const ref = this.modal.open(PcaModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'dimensionality-reduction', data:{
+                    input_file: result.input_file,
+                    columns_name: result.columns_name,
+                    n_components: result.n_components,
+                    log2: result.log2,
+                    type: 'pca'
+                  }})
+              })
+            })
+            break
+          case 'phate':
+            zone.run(() => {
+              const ref = this.modal.open(PhateModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'dimensionality-reduction', data:{
+                    input_file: result.input_file,
+                    columns_name: result.columns_name,
+                    n_components: result.n_components,
+                    log2: result.log2,
+                    type: 'phate'
+                  }})
+              })
+            })
+            break
+        }
+      })
+      this.electronService.curtainChannelSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'convert-diann-to-curtainptm':
+            zone.run(() => {
+              const ref = this.modal.open(DiannToCurtainptmModalComponent)
+              ref.result.then(async (result) => {
+                this.jobQueue.queue.createJob({type: 'curtain', data:{
+                    pr_file_path: result.pr_file_path,
+                    report_file_path: result.report_file_path,
+                    modification_of_interests: result.modification_of_interests,
+                    type: 'convert-diann-to-curtainptm'
+                  }})
+              })
+            })
+            break
+          case 'convert-msfragger-to-curtainptm':
+            zone.run(() => {
+              const ref = this.modal.open(MsfraggerToCurtainptmModalComponent)
+              ref.result.then(async (result) => {
+                this.jobQueue.queue.createJob({type: 'curtain', data:{
+                    file_path: result.file_path,
+                    index_col: result.index_col,
+                    peptide_col: result.peptide_col,
+                    fasta_file: result.fasta_file,
+                    type: 'convert-msfragger-to-curtainptm'
+                  }})
+              })
+            })
+            break
+        }
+      })
+
     } else {
       console.log('Run in browser');
     }

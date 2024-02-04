@@ -8,7 +8,6 @@
   },
   "keywords": [],
   "main": "app/main.js",
-
   "private": true,
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
@@ -51,6 +50,7 @@
     "data-forge-fs": "0.0.9",
     "embedded-queue": "0.0.11",
     "glob": "10.3.10",
+    "ngx-colors": "3.5.3",
     "plotly.js-dist-min": "2.28.0",
     "python-shell": "5.0.0",
     "rxjs": "7.8.1",

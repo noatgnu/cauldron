@@ -1,0 +1,79 @@
+<div class="modal-header">
+  <h5 class="modal-title">Impute Missing Values</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="d-flex flex-column gap-1">
+      <div class="form-group">
+        <label id="inputFile">Input File</label>
+        <input type="text" readonly formControlName="file_path" class="form-control">
+        <button type="button" class="btn btn-primary mt-1" (click)="openFile()">Browse</button>
+      </div>
+      <div class="form-group">
+        <label for="selectedCols">Select Sample Columns</label>
+        <select formControlName="columns" id="selectedCols" class="form-select" multiple>
+          @for (col of columns; track col) {
+            <option [value]="col">
+              {{ col }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-floating">
+        <select formControlName="method" id="method" class="form-select">
+          <option value="knn">
+            KNN
+          </option>
+          <option value="simple">
+            Simple Imputation
+          </option>
+          <option value="iterative">
+            Iterative Imputation
+          </option>
+        </select>
+        <label for="method">Method</label>
+      </div>
+      @if (form.value.method === 'knn') {
+        <div class="form-floating">
+          <input formControlName="k" type="number" class="form-control" id="k" placeholder="K">
+          <label for="k">K-neighbors</label>
+        </div>
+      } @else if (form.value.method === 'simple') {
+        <div class="form-floating">
+          <select formControlName="strategy" id="strategy" class="form-select">
+            <option value="mean">
+              Mean
+            </option>
+            <option value="median">
+              Median
+            </option>
+            <option value="most_frequent">
+              Most Frequent
+            </option>
+            <option value="constant">
+              Constant
+            </option>
+          </select>
+          <label for="strategy">Strategy</label>
+        </div>
+        @if (form.value.strategy === 'constant') {
+          <div class="form-floating">
+            <input formControlName="fillValue" type="number" class="form-control" id="fillValue" placeholder="Constant Value">
+            <label for="fillValue">Constant Value</label>
+          </div>
+        }
+      } @else {
+        <div class="form-floating">
+          <input formControlName="iterations" class="form-control" id="iterations" type="number">
+          <label for="iterations">Iterations</label>
+        </div>
+      }
+    </div>
+
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Impute</button>
+</div>

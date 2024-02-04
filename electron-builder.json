@@ -29,8 +29,15 @@
       "to": "./requirements.txt"
     },
     {
-      "from": "./scripts",
+      "from": "./app/scripts",
       "to": "./scripts",
+      "filter": [
+        "**/*"
+      ]
+    },
+    {
+      "from": "./app/examples",
+      "to": "./examples",
       "filter": [
         "**/*"
       ]

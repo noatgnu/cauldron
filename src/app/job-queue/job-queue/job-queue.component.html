@@ -5,21 +5,38 @@
         <div class="container-fluid">
           <div class="navbar-brand">Job Queue</div>
           <div class="d-flex justify-content-end flex-row gap-1">
+            <button class="btn btn-sm btn-outline-light" (click)="queueName='previous'">Previous</button>
+            <button class="btn btn-sm btn-outline-light" (click)="queueName='current'">Current</button>
           </div>
         </div>
       </nav>
-      <div class="list-group d-flex flex-column rounded-0">
-        @for(j of Object.keys(jobMap); track j) {
-          <div (click)="clickedJob=jobMap[j].job" [ngClass]="{'list-group-item': true, 'd-flex': true}">
-            @if (clickedJob==jobMap[j].job) {
-              <div style="width: 10px" class="bg-warning"></div>
-            }
-            <div [ngClass]="{'bg-danger': jobMap[j].error, 'bg-success': jobMap[j].completed, 'text-light': jobMap[j].completed||jobMap[j].error}">
-              <div>Type: {{jobMap[j].job.type}}</div>
-              <div>ID: {{jobMap[j].job.id}}</div>
+      <div class="list-group d-flex flex-column rounded-0 overflow-auto">
+        @if (queueName==='previous') {
+          @for(j of Object.keys(previousJobMap); track j) {
+            <div (click)="handleJobClick(previousJobMap[j])" [ngClass]="{'list-group-item': true, 'd-flex': true}">
+              @if (clickedJob==previousJobMap[j]) {
+                <div style="width: 10px" class="bg-warning"></div>
+              }
+              <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': previousJobMap[j].error, 'bg-success': previousJobMap[j].completed, 'text-light': previousJobMap[j].completed||previousJobMap[j].error}">
+                <div>Type: {{previousJobMap[j].type}}</div>
+                <div>ID: {{previousJobMap[j].job.id}}</div>
+              </div>
             </div>
-          </div>
+          }
+        } @else {
+          @for(j of Object.keys(jobMap); track j) {
+            <div (click)="handleJobClick(jobMap[j])" [ngClass]="{'list-group-item': true, 'd-flex': true}">
+              @if (clickedJob==jobMap[j]) {
+                <div style="width: 10px" class="bg-warning"></div>
+              }
+              <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': jobMap[j].error, 'bg-success': jobMap[j].completed, 'text-light': jobMap[j].completed||jobMap[j].error}">
+                <div>Type: {{jobMap[j].type}}</div>
+                <div>ID: {{jobMap[j].job.id}}</div>
+              </div>
+            </div>
+          }
         }
+
       </div>
     </div>
     <div class="d-flex flex-column border-black w-100" style="height: 100%">
@@ -30,25 +47,44 @@
       </nav>
       @if (clickedJob) {
         <div class="container p-5">
-          <p><b>Job Type</b>: {{getJobData(clickedJob)['type']}}</p>
-          <p><b>Job State</b>: {{clickedJob.state}}</p>
-          <p><b>Job Queue</b>: {{clickedJob.type}}</p>
-          <p><b>Job ID</b>: {{clickedJob.id}}</p>
-          <p><b>Job Started At</b>: {{clickedJob.startedAt}}</p>
-          <p><b>Job Completed At</b>: {{clickedJob.completedAt}}</p>
-          <p><b>Job Duration</b>: {{clickedJob.duration}}</p>
-          <p><b>Job Failed At</b>: {{clickedJob.failedAt}}</p>
-          @if (jobMap[clickedJob.id].completed) {
-            <p><b>Job Result Location</b>: <i class="bi bi-folder" (click)="openFileExplorerAt(clickedJob.id)"></i></p>
+          <p><b>Job Type</b>: {{clickedJob.type}}</p>
+          <p><b>Job State</b>: {{clickedJob.job.state}}</p>
+          <p><b>Job Queue</b>: {{clickedJob.job.type}}</p>
+          <p><b>Job ID</b>: {{clickedJob.job.id}}</p>
+          <p><b>Job Started At</b>: {{clickedJob.job.startedAt}}</p>
+          <p><b>Job Completed At</b>: {{clickedJob.job.completedAt}}</p>
+          <p><b>Job Duration</b>: {{clickedJob.job.duration}}</p>
+          <p><b>Job Failed At</b>: {{clickedJob.job.failedAt}}</p>
+          @if (getJobStatus(clickedJob.job)) {
+            <p><b>Job Result Location</b>: <i class="bi bi-folder" (click)="openFileExplorerAt(clickedJob.job.id)"></i></p>
           }
-          @if (clickedJob.progress) {
+          <div class="mb-1">
 
-            @if (!jobMap[clickedJob.id].completed && !jobMap[clickedJob.id].error) {
-              <ngb-progressbar [value]="clickedJob.progress" type="primary"></ngb-progressbar>
+          </div>
+
+          <div class="d-flex mb-1 flex-row gap-1">
+            @if (clickedJob.completed) {
+              <button class="btn btn-primary" (click)="openAnnotationModal()">Assign Condition</button>
+            }
+            @switch (clickedJob.type) {
+              @case ('pca') {
+                <button class="btn btn-primary" (click)="openPCAPlot()"><i class="bi bi-graph-up"></i> PCA</button>
+              }
+              @case ('phate') {
+                <button class="btn btn-primary" (click)="openPHATEPlot()"><i class="bi bi-graph-up"></i> PHATE</button>
+              }
+
+            }
+          </div>
+
+          @if (clickedJob.job.progress) {
+
+            @if (!jobMap[clickedJob.job.id].completed && !jobMap[clickedJob.job.id].error) {
+              <ngb-progressbar [value]="clickedJob.job.progress" type="primary"></ngb-progressbar>
             } @else {
-              @if (jobMap[clickedJob.id].error) {
+              @if (jobMap[clickedJob.job.id].error) {
                 <ngb-progressbar [value]="100" type="danger"></ngb-progressbar>
-              } @else if (jobMap[clickedJob.id].completed) {
+              } @else if (jobMap[clickedJob.job.id].completed) {
                 <ngb-progressbar [value]="100" type="success"></ngb-progressbar>
               } @else {
                 <ngb-progressbar [value]="100" type="primary"></ngb-progressbar>

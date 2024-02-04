@@ -1,4 +1,4 @@
-import {app, BrowserWindow, screen, Menu, ipcMain} from 'electron';
+import {app, BrowserWindow, screen, Menu, ipcMain, dialog} from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as main from '@electron/remote/main'
@@ -86,6 +86,69 @@ const menuTemplate = [
     ]
   },
   {
+    label: 'Data Transformation',
+    submenu: [
+      {
+        label: 'Impute Missing Values',
+        click: async () => {
+          win?.webContents.send('data-transformation', 'impute-missing-values')
+        }
+      },
+      {
+        label: 'Normalize Data',
+        click: async () => {
+          win?.webContents.send('data-transformation', 'normalize-data')
+        }
+      }
+    ]
+  },
+  {
+    label: 'Dimensionality Reduction',
+    submenu: [
+      {
+        label: 'PCA',
+        click: async () => {
+          win?.webContents.send('dimensionality-reduction', 'pca')
+        }
+      },
+      {
+        label: 'PHATE',
+        click: async () => {
+          win?.webContents.send('dimensionality-reduction', 'phate')
+        }
+      }
+    ]
+  },
+  {
+    label: 'Citation Utility',
+    submenu: [
+      {
+        label: 'Protocols.io to RIS Files',
+        click: async () => {
+          win?.webContents.send('citation-utility', 'generate-ris-citation')
+        }
+      }
+    ]
+  },
+  {
+    label: 'Curtain',
+    submenu: [
+      {
+        label: 'Convert DIA-NN to CurtainPTM',
+        click: async () => {
+          win?.webContents.send('curtain', 'convert-diann-to-curtainptm')
+        }
+      },
+      {
+        label: 'Convert MSFragger to CurtainPTM',
+        click: async () => {
+          win?.webContents.send('curtain', 'convert-msfragger-to-curtainptm')
+        }
+      }
+    ]
+  }
+  ,
+  {
     label: 'Help',
     submenu: [
 
@@ -148,6 +211,22 @@ function createWindow(): BrowserWindow {
     const url = new URL(path.join('file:', __dirname, pathIndex));
     win.loadURL(url.href);
   }
+
+  win.on('close', (e) => {
+    e.preventDefault()
+    win?.webContents.send('close', 'close')
+    dialog.showMessageBox({
+      type: 'question',
+      buttons: ['Yes', 'cancel'],
+      title: 'Confirm',
+      message: 'Are you sure you want to quit?'
+    }).then(result => {
+      if (result.response === 0) {
+        win?.destroy()
+        app.quit()
+      }
+    })
+  })
 
   // Emitted when the window is closed.
   win.on('closed', () => {

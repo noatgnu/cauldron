@@ -1,0 +1,89 @@
+<div class="modal-header">
+  <h5 class="modal-title">Normalize Data</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-floating">
+      <input type="text" class="form-control" id="file_path" readonly formControlName="file_path">
+      <label for="file_path">File Path</label>
+      <button type="button" class="btn btn-primary mt-1" (click)="openFile()">Browse</button>
+    </div>
+    <div class="form-group">
+      <label for="columns_name">Sample Columns</label>
+      <select class="form-select" id="columns_name" formControlName="columns_name" multiple>
+        @for (column of columns; track column) {
+          <option value="{{ column }}">{{ column }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="scaler_type">Scaler Type</label>
+      <select class="form-select" id="scaler_type" formControlName="scaler_type">
+        <option value="minmax">MinMax</option>
+        <option value="standard">Standard</option>
+        <option value="robust">Robust</option>
+        <option value="maxabs">MaxAbs</option>
+        <option value="quantile">Quantile Transformer</option>
+        <option value="power">Power Transformer</option>
+        <option value="normalizer">Normalizer</option>
+      </select>
+    </div>
+    @switch (form.value['scaler_type']) {
+      @case ("robust") {
+        <ng-container *ngTemplateOutlet="centering"></ng-container>
+
+      }
+      @case ("standard") {
+        <ng-container *ngTemplateOutlet="centering"></ng-container>
+        <ng-container *ngTemplateOutlet="scaling"></ng-container>
+      }
+      @case("quantile") {
+        <div class="form-floating">
+          <input type="number" class="form-control" id="n_quantiles" formControlName="n_quantiles">
+          <label for="n_quantiles">N Quantiles</label>
+        </div>
+        <div class="form-floating">
+          <select class="form-select" id="output_distribution" formControlName="output_distribution">
+            <option value="uniform">Uniform</option>
+            <option value="normal">Normal</option>
+          </select>
+        </div>
+      }
+      @case ("power") {
+        <div class="form-floating">
+          <select formControlName="power_method" class="form-select" id="power_method">
+            <option value="yeo-johnson">Yeo-Johnson</option>
+            <option value="box-cox">Box-Cox</option>
+          </select>
+          <label for="power_method">Power Method</label>
+        </div>
+      }
+      @case ("normalizer") {
+        <div class="form-floating">
+          <select formControlName="norm" class="form-select" id="norm">
+            <option value="l1">L1</option>
+            <option value="l2">L2</option>
+            <option value="max">Max</option>
+          </select>
+          <label for="norm">Norm</label>
+        </div>
+      }
+    }
+    <ng-template #centering>
+      <div class="form-check" >
+        <input class="form-check-input" type="checkbox" id="centering" formControlName="with_centering">
+        <label class="form-check-label" for="centering">Centering</label>
+      </div>
+    </ng-template>
+    <ng-template #scaling>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="quantile" formControlName="with_scaling">
+        <label class="form-check-label" for="quantile">Scaling</label>
+      </div>
+    </ng-template>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Normalize</button>
+</div>

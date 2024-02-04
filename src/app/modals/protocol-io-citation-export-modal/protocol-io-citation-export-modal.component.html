@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h5 class="modal-title">Export Protocols.io RIS</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form">
+    <div class="form-group">
+      <label for="ris">Protocols.io ID</label>
+      <textarea class="form-control" formControlName="idList" id="ris" rows="10"></textarea>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="download()">Export</button>
+</div>

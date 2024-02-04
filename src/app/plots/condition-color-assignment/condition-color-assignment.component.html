@@ -1,0 +1,12 @@
+<form [formGroup]="form">
+  @for (c of conditions; track c) {
+    <div class="d-flex justify-content-start align-items-center">
+      <div>
+        {{c}}
+      </div>
+      <div>
+        <ngx-colors ngx-colors-trigger [formControlName]="c"></ngx-colors>
+      </div>
+    </div>
+  }
+</form>

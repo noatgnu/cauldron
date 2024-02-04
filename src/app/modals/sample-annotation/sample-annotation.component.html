@@ -1,0 +1,43 @@
+<div class="modal-header">
+  <h5 class="modal-title">Sample Annotation</h5>
+</div>
+<div class="modal-body">
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Sample</th>
+      <th scope="col">Condition</th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (s of annotation; track s) {
+        <tr>
+          <td>
+            <div class="form-floating">
+              <input type="text" class="form-control" [(ngModel)]="s.Sample" [readonly]="mode==='edit'">
+              <label>Sample</label>
+            </div>
+          </td>
+          <td>
+            <div class="form-floating">
+              <input type="text" class="form-control" [(ngModel)]="s.Condition">
+              <label>Condition</label>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  <div class="d-flex flex-row gap-1">
+    @if (mode === 'create') {
+      <button type="button" class="btn btn-primary" (click)="addSample()">Add Sample</button>
+      <button type="button" class="btn btn-primary" (click)="parseFromClipboard('Sample')"><i class="bi bi-clipboard"></i>Parse Sample</button>
+    }
+    <button type="button" class="btn btn-primary" (click)="parseFromClipboard('Condition')"><i class="bi bi-clipboard"></i>Parse Condition</button>
+  </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="save()">Save changes</button>
+</div>

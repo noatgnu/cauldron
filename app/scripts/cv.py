@@ -36,6 +36,7 @@ def main(log_file_path: str, report_pr_file_path: str, report_pg_file_path: str,
                             samples.append(match.group(1))
     assert len(samples) > 0, "Please provide sample names"
     annotation = pd.read_csv(annotation_file, sep="\t")
+    os.makedirs(output_file, exist_ok=True)
     if report_pr_file_path != "":
         pr_df = pd.read_csv(report_pr_file_path, sep="\t")
         pr_df = pr_df.melt(id_vars=[k for k in pr_df.columns if k not in samples], value_vars=samples, var_name="Sample", value_name=intensity_col)
@@ -43,7 +44,7 @@ def main(log_file_path: str, report_pr_file_path: str, report_pg_file_path: str,
         pr_df = pr_df.merge(annotation, on="Sample", how="left")
         pr_df = pr_df.groupby(["Condition", "Protein.Group", "Modified.Sequence"]).apply(lambda x: variation(x[intensity_col], nan_policy="omit")).reset_index()
         pr_df.rename(columns={0: "CV"}, inplace=True)
-        draw_cv_intensity(pr_df,   os.path.join(output_file, "pr_cv.svg"))
+        draw_cv_intensity(pr_df,  os.path.join(output_file, "pr_cv.svg"))
     if report_pg_file_path != "":
         pg_df = pd.read_csv(report_pg_file_path, sep="\t")
         pg_df = pg_df.melt(id_vars=[k for k in pg_df.columns if k not in samples], value_vars=samples, var_name="Sample", value_name=intensity_col)

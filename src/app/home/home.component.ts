@@ -4,10 +4,10 @@ import {ElectronService} from "../core/services";
 import {ToastService} from "../toast-container/toast.service";
 import {DataFrame, fromCSV} from "data-forge";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {UniprotModalComponent} from "../uniprot-modal/uniprot-modal.component";
+import {UniprotModalComponent} from "../modals/uniprot-modal/uniprot-modal.component";
 import * as worker_threads from "worker_threads";
 import { JobQueueService } from '../job-queue/job-queue.service';
-import {DiannCvModalComponent} from "../diann-cv-modal/diann-cv-modal.component";
+import {DiannCvModalComponent} from "../modals/diann-cv-modal/diann-cv-modal.component";
 
 @Component({
   selector: 'app-home',
