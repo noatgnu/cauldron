@@ -2,9 +2,8 @@ import {Injectable, NgZone} from '@angular/core';
 import {ElectronService} from "../core/services";
 import {Job, Queue} from "embedded-queue";
 import {Accession, Parser} from "uniprotparserjs";
-import {DataFrame, fromCSV, IDataFrame, ISeries, Series} from "data-forge";
+import { fromCSV, IDataFrame, ISeries, Series} from "data-forge";
 import {ToastService} from "../toast-container/toast.service";
-import {JobConstructorData} from "embedded-queue/dist/job";
 
 
 @Injectable({
@@ -12,8 +11,8 @@ import {JobConstructorData} from "embedded-queue/dist/job";
 })
 export class JobQueueService {
   queue!: Queue;
-  jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string}} = {}
-  previousJobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string}} = {}
+  jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string, name?: string}} = {}
+  previousJobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string, name?: string}} = {}
   processingCount = 0
   completedCount = 0
   errorCount: number = 0
@@ -40,15 +39,17 @@ export class JobQueueService {
     )
     queue.on(
       this.electronService.embeddedQueue.Event.Failure, (job: Job, error: any) => {
-        console.log("Job Failed")
-        console.log("Job ID: "+job.id)
-        console.log("Job Type: "+job.type)
-        // @ts-ignore
-        this.jobMap[job.id] = {completed: true, job: job, error: false, type: job.data.type}
-        this.processingCount--
-        this.errorCount++
-        this.toastService.show("Job Failed", `Job ID: ${job.id}. Job Type: ${job.type}`)
-        console.log(this.jobMap[job.id])
+        this.zone.run(() => {
+          console.log("Job Failed")
+          console.log("Job ID: "+job.id)
+          console.log("Job Type: "+job.type)
+          // @ts-ignore
+          this.jobMap[job.id] = {completed: false, job: job, error: true, type: job.data.type}
+          this.processingCount--
+          this.errorCount++
+          this.toastService.show("Job Failed", `Job ID: ${job.id}. Job Type: ${job.type}`)
+        })
+
       }
     )
     queue.on(
@@ -68,17 +69,19 @@ export class JobQueueService {
     )
     queue.on(
       this.electronService.embeddedQueue.Event.Start, (job: Job) => {
-        console.log("Job Started")
-        console.log("Job ID: "+job.id)
-        console.log("Job Type: "+job.type)
-        // @ts-ignore
-        this.jobMap[job.id] = {completed: true, job: job, error: false, type: job.data.type}
-        const result = this.electronService.fs.mkdirSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id), {recursive: true})
-        const data = JSON.stringify(job.data)
-        this.electronService.fs.writeFileSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id, "job_data.json"), data)
-        this.processingCount++
-        this.toastService.show("Job Started", `Job ID: ${job.id}. Job Type: ${job.type}`)
-
+        this.zone.run(() => {
+          this.jobMap[job.id].name = "Untitled job"
+          console.log("Job Started")
+          console.log("Job ID: "+job.id)
+          console.log("Job Type: "+job.type)
+          // @ts-ignore
+          this.jobMap[job.id] = {completed: false, job: job, error: false, type: job.data.type}
+          const result = this.electronService.fs.mkdirSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id), {recursive: true})
+          const data = JSON.stringify(job.data)
+          this.electronService.fs.writeFileSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id, "job_data.json"), data)
+          this.processingCount++
+          this.toastService.show("Job Started", `Job ID: ${job.id}. Job Type: ${job.type}`)
+        })
       }
     )
     await this.setupUniProtJobQueue(queue)
@@ -338,32 +341,33 @@ export class JobQueueService {
           if (this.electronService.translatedPlatform === 'win') {
             bin = "diann-curtainptm.exe"
           }
-          try {
-            const result =  await this.electronService.pythonShell.run([
-              this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
-              "bin",
-              this.electronService.translatedPlatform,
-              "python",
-              "Scripts",
-              bin
-            ].join(this.electronService.path.sep), options)
-          } catch (e) {
-            console.log(e)
-          }
+          const result =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "bin",
+            this.electronService.translatedPlatform,
+            "python",
+            "Scripts",
+            bin
+          ].join(this.electronService.path.sep), options)
 
           await job.setProgress(100, 100)
           break
         case "convert-msfragger-to-curtainptm":
           const options_ms = Object.assign({}, this.electronService.pythonOptions)
           const payload_ms = data as {file_path: string, index_col: string, peptide_col: string, fasta_file: string, type: string}
+
           options_ms.args = [
             "--file_path", payload_ms.file_path,
             "--index_col", payload_ms.index_col,
             "--peptide_col", payload_ms.peptide_col,
-            "--fasta_file", payload_ms.fasta_file,
             "--output_file", [this.electronService.settings.resultStoragePath, job.id, "for_curtainptm.txt"].join(this.electronService.path.sep)
           ]
-          console.log(options_ms.args)
+
+          if (payload_ms.fasta_file !== "" && payload_ms.fasta_file !== null) {
+            options_ms.args.push("--fasta_file")
+            options_ms.args.push(payload_ms.fasta_file)
+          }
+
           let bin_msf = "msf-curtainptm"
           if (this.electronService.translatedPlatform === 'win') {
             bin_msf = "msf-curtainptm.exe"

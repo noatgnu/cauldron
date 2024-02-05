@@ -225,9 +225,9 @@ export class ElectronService {
     this.fs.closeSync(fd)
   }
 
-  saveJobQueue(jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string}}) {
+  saveJobQueue(jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string, name?: string}}) {
     const jobQueuePath = this.path.join(this.userDataPath, "jobQueue.json")
-    const payload: {[key: string]: {completed: boolean, job: any, error: boolean, type: string}} = this.loadJobQueue()
+    const payload: {[key: string]: {completed: boolean, job: any, error: boolean, type: string, name?: string}} = this.loadJobQueue()
     for (const key of Object.keys(jobMap)) {
       const job: any = {
         createdAt: jobMap[key].job.createdAt,
@@ -241,7 +241,7 @@ export class ElectronService {
         failedAt: jobMap[key].job.failedAt,
         duration: jobMap[key].job.duration,
       }
-      payload[key] = { completed: jobMap[key].completed, job: job, error: jobMap[key].error, type: jobMap[key].type}
+      payload[key] = { completed: jobMap[key].completed, job: job, error: jobMap[key].error, type: jobMap[key].type, name: jobMap[key].name}
     }
     console.log(payload)
     this.fs.writeFileSync(jobQueuePath, JSON.stringify(payload))

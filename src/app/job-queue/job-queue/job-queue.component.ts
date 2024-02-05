@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, NgZone} from '@angular/core';
 import {DataStorageSettingsComponent} from "../../settings/data-storage-settings/data-storage-settings.component";
 import {ElectronService} from "../../core/services";
 import {JobQueueService} from "../job-queue.service";
@@ -9,6 +9,7 @@ import {PcaPlotModalComponent} from "../../modals/pca-plot-modal/pca-plot-modal.
 import {PhatePlotModalComponent} from "../../modals/phate-plot-modal/phate-plot-modal.component";
 import {SampleAnnotationComponent} from "../../modals/sample-annotation/sample-annotation.component";
 import {DataFrame, IDataFrame} from "data-forge";
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-job-queue',
@@ -16,25 +17,51 @@ import {DataFrame, IDataFrame} from "data-forge";
   imports: [
     DataStorageSettingsComponent,
     NgClass,
-    NgbProgressbar
+    NgbProgressbar,
+    FormsModule,
+    ReactiveFormsModule
   ],
   templateUrl: './job-queue.component.html',
   styleUrl: './job-queue.component.scss'
 })
 export class JobQueueComponent {
-  jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string}} = {}
-  previousJobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string}} = {}
-  clickedJob: {completed: boolean, job: any, error: boolean, type: string} | undefined;
+  jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string, name?: string}} = {}
+  previousJobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string, name?: string}} = {}
+  clickedJob: {completed: boolean, job: any, error: boolean, type: string, name?: string} | undefined;
   settings = this.electronService.settings;
-  queueName: "previous"|"current" = "current"
+  _queueName: "previous"|"current" = "current"
+  set queueName(value: "previous"|"current") {
+    this._queueName = value
+    if (value === "previous") {
+      this.displayJob = Object.values(this.previousJobMap).reverse()
+    } else {
+      this.displayJob = Object.values(this.jobMap).reverse()
+    }
+  }
+  get queueName() {
+    return this._queueName
+  }
   sampleAnnotation: IDataFrame<number, {Sample: string, Condition: string}> = new DataFrame()
-  constructor(private jobQueue: JobQueueService, private electronService: ElectronService, private modal : NgbModal) {
+
+  form: FormGroup = this.fb.group({
+    jobSearch: new FormControl("")
+  })
+
+  displayJob: {completed: boolean, job: any, error: boolean, type: string, name?: string}[] = []
+
+  constructor(private zone: NgZone, private jobQueue: JobQueueService, private electronService: ElectronService, private modal : NgbModal, private fb: FormBuilder) {
+    console.log(this.form)
     this.jobMap = this.jobQueue.jobMap
     this.previousJobMap = this.jobQueue.previousJobMap
+
+    this.form.controls['jobSearch'].valueChanges.subscribe((value: string) => {
+
+      this.jobSearch(value)
+
+    })
   }
 
   getJobData(job: any){
-    console.log(job)
     if ("data" in job.job) {
       return job.job.data as any
     } else {
@@ -83,8 +110,12 @@ export class JobQueueComponent {
 
   }
 
-  handleJobClick(job: {completed: boolean, job: any, error: boolean, type: string}) {
+  handleJobClick(job: {completed: boolean, job: any, error: boolean, type: string, name?: string}) {
     this.clickedJob = job
+    if (!job.name) {
+      job.name = "Untitled job"
+    }
+
     this.electronService.fs.exists(this.electronService.path.join(this.settings.resultStoragePath, job.job.id, 'annotation.txt'), (exists: boolean) => {
       console.log(job)
 
@@ -109,5 +140,27 @@ export class JobQueueComponent {
       })
     }
   }
+
+  jobSearch(value: string) {
+    let jobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string, name?: string}} = {}
+    if (this.queueName === "current") {
+      jobMap = this.jobMap
+    } else {
+      jobMap = this.previousJobMap
+    }
+    if (value) {
+      this.displayJob = Object.values(jobMap).filter((job: any) => {
+        if (job.name) {
+          return job.name.indexOf(value) !== -1
+        } else if (job.type) {
+          return job.type.indexOf(value) !== -1
+        }
+        return job.job.id.indexOf(value) !== -1
+      }).reverse()
+    } else {
+      this.displayJob = Object.values(jobMap).reverse()
+    }
+  }
+
   protected readonly Object = Object;
 }

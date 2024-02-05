@@ -10,33 +10,27 @@
           </div>
         </div>
       </nav>
+      <form [formGroup]="form" class="mb-2">
+        <div class="form-floating">
+          <input class="form-control" id="jobName" formControlName="jobSearch" type="search">
+          <label for="jobName">Job Name</label>
+        </div>
+      </form>
       <div class="list-group d-flex flex-column rounded-0 overflow-auto">
-        @if (queueName==='previous') {
-          @for(j of Object.keys(previousJobMap); track j) {
-            <div (click)="handleJobClick(previousJobMap[j])" [ngClass]="{'list-group-item': true, 'd-flex': true}">
-              @if (clickedJob==previousJobMap[j]) {
-                <div style="width: 10px" class="bg-warning"></div>
+        @for (j of displayJob; track j) {
+          <div (click)="handleJobClick(j)" [ngClass]="{'list-group-item': true, 'd-flex': true}">
+            @if (clickedJob==j) {
+              <div style="width: 10px" class="bg-warning"></div>
+            }
+            <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': j.error, 'bg-success': j.completed, 'text-light': j.completed||j.error}">
+              @if (j.name) {
+                <div>Name: {{j.name}}</div>
               }
-              <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': previousJobMap[j].error, 'bg-success': previousJobMap[j].completed, 'text-light': previousJobMap[j].completed||previousJobMap[j].error}">
-                <div>Type: {{previousJobMap[j].type}}</div>
-                <div>ID: {{previousJobMap[j].job.id}}</div>
-              </div>
+              <div>Type: {{j.type}}</div>
+              <div>ID: {{j.job.id}}</div>
             </div>
-          }
-        } @else {
-          @for(j of Object.keys(jobMap); track j) {
-            <div (click)="handleJobClick(jobMap[j])" [ngClass]="{'list-group-item': true, 'd-flex': true}">
-              @if (clickedJob==jobMap[j]) {
-                <div style="width: 10px" class="bg-warning"></div>
-              }
-              <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': jobMap[j].error, 'bg-success': jobMap[j].completed, 'text-light': jobMap[j].completed||jobMap[j].error}">
-                <div>Type: {{jobMap[j].type}}</div>
-                <div>ID: {{jobMap[j].job.id}}</div>
-              </div>
-            </div>
-          }
+          </div>
         }
-
       </div>
     </div>
     <div class="d-flex flex-column border-black w-100" style="height: 100%">
@@ -47,6 +41,11 @@
       </nav>
       @if (clickedJob) {
         <div class="container p-5">
+          <div class="form-floating">
+            <input class="form-control" [(ngModel)]="clickedJob.name" type="text">
+            <label for="jobName">Job Name</label>
+          </div>
+
           <p><b>Job Type</b>: {{clickedJob.type}}</p>
           <p><b>Job State</b>: {{clickedJob.job.state}}</p>
           <p><b>Job Queue</b>: {{clickedJob.job.type}}</p>

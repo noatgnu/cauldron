@@ -2,7 +2,7 @@
   <h5 class="modal-title">DIA-NN to CurtainPTM converter</h5>
 </div>
 <div class="modal-body">
-  <form [formGroup]="form">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="file_path" formControlName="file_path" placeholder="File path">
       <label for="file_path">File path</label>
@@ -30,7 +30,7 @@
     </div>
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="fasta_file" formControlName="fasta_file" placeholder="Fasta path">
-      <label for="fasta_file">Fasta path (optional if index column has only parseable UniProt accession ids)</label>
+      <label for="fasta_file">Fasta path (optional)</label>
       <button type="button" class="btn btn-primary mt-1" (click)="openFile('fasta_file')">Browse</button>
     </div>
   </form>

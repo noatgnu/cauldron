@@ -19,7 +19,7 @@ export class MsfraggerToCurtainptmModalComponent {
     file_path: new FormControl(null, Validators.required),
     index_col: new FormControl(null, Validators.required),
     peptide_col: new FormControl(null, Validators.required),
-    fasta_file: new FormControl(""),
+    fasta_file: new FormControl(null),
   })
   columns: string[] = []
 
@@ -41,6 +41,7 @@ export class MsfraggerToCurtainptmModalComponent {
       properties: ['openFile'],
       filters: [
         {name: 'text file', extensions: ['tsv', 'txt']},
+        {name: 'fasta file', extensions: ['fasta', 'fa', 'fas']},
       ]
     }).then(result => {
       if (!result.canceled) {
