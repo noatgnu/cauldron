@@ -15,6 +15,10 @@ import {DiannToCurtainptmModalComponent} from "./modals/diann-to-curtainptm-moda
 import {
   MsfraggerToCurtainptmModalComponent
 } from "./modals/msfragger-to-curtainptm-modal/msfragger-to-curtainptm-modal.component";
+import {LimmaModalComponent} from "./modals/limma-modal/limma-modal.component";
+import {SampleAnnotationComponent} from "./modals/sample-annotation/sample-annotation.component";
+import {DataFrame} from "data-forge";
+import {QfeaturesLimmaModalComponent} from "./modals/qfeatures-limma-modal/qfeatures-limma-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -133,7 +137,7 @@ export class AppComponent {
             zone.run(() => {
               const ref = this.modal.open(DiannToCurtainptmModalComponent)
               ref.result.then(async (result) => {
-                this.jobQueue.queue.createJob({type: 'curtain', data:{
+                await this.jobQueue.queue.createJob({type: 'curtain', data:{
                     pr_file_path: result.pr_file_path,
                     report_file_path: result.report_file_path,
                     modification_of_interests: result.modification_of_interests,
@@ -146,13 +150,85 @@ export class AppComponent {
             zone.run(() => {
               const ref = this.modal.open(MsfraggerToCurtainptmModalComponent)
               ref.result.then(async (result) => {
-                this.jobQueue.queue.createJob({type: 'curtain', data:{
+                await this.jobQueue.queue.createJob({type: 'curtain', data:{
                     file_path: result.file_path,
                     index_col: result.index_col,
                     peptide_col: result.peptide_col,
                     fasta_file: result.fasta_file,
                     type: 'convert-msfragger-to-curtainptm'
                   }})
+              })
+            })
+            break
+        }
+      })
+      this.electronService.differentialAnalysisSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'limma':
+            zone.run(() => {
+              const ref = this.modal.open(LimmaModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'differential-analysis', data: {
+                    input_file: result.input_file,
+                    annotation_file: result.annotation_file,
+                    index_col: result.index_col,
+                    log2: result.log2,
+                    comparisons: result.comparisons,
+                    type: 'limma'
+                  }})
+              })
+            })
+            break
+          case 'qfeatures-limma':
+            zone.run(() => {
+              const ref = this.modal.open(QfeaturesLimmaModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'differential-analysis', data: {
+                  input_file: result.input_file,
+                    annotation_file: result.annotation_file,
+                    index_col: result.index_col,
+                    log2: result.log2,
+                    comparisons: result.comparisons,
+                    normalization: result.normalization,
+                    imputation: result.imputation,
+                    rowFilter: result.rowFilter,
+                    colFilter: result.colFilter,
+                    aggregateColumn: result.aggregateColumn,
+                    aggregateMethod: result.aggregateMethod,
+                    type: 'qfeatures-limma'
+                  }})
+              })
+            })
+            break
+        }
+      })
+      this.electronService.fileSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'create-annotation-file':
+            zone.run(() => {
+              const ref = this.modal.open(SampleAnnotationComponent)
+              ref.componentInstance.mode = 'create'
+              ref.result.then(async (data) => {
+                this.electronService.remote.dialog.showSaveDialog({
+                  title: 'Save Annotation File',
+                  defaultPath: this.electronService.path.join(this.electronService.settings.resultStoragePath, 'annotation.txt'),
+                  filters: [
+                    {name: 'All Files', extensions: ['*']},
+                    {name: 'text file', extensions: ['tsv', 'txt']},
+                  ]
+                }).then((result) => {
+                  if (!result.canceled) {
+                    const df = new DataFrame(data)
+                    if (result.filePath) {
+                      // @ts-ignore
+                      this.electronService.fs.writeFile(result.filePath, df.toCSV({delimiter: '\t'}), (err) => {
+                        if (err) {
+                          console.error(err)
+                        }
+                      })
+                    }
+                  }
+                })
               })
             })
             break

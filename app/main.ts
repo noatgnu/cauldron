@@ -60,7 +60,13 @@ const menuTemplate = [
   {
     label: 'File',
     submenu: [
-      osMac ? { role: 'close' } : { role: 'quit' }
+      osMac ? { role: 'close' } : { role: 'quit' },
+      {
+        label: 'Create Annotation File',
+        click: async () => {
+          win?.webContents.send('file', 'create-annotation-file')
+        }
+      }
       ]
   },
   {
@@ -143,6 +149,23 @@ const menuTemplate = [
         label: 'Convert MSFragger to CurtainPTM',
         click: async () => {
           win?.webContents.send('curtain', 'convert-msfragger-to-curtainptm')
+        }
+      }
+    ]
+  },
+  {
+    label: 'Differential Analysis',
+    submenu: [
+      {
+        label: 'limma',
+        click: async () => {
+          win?.webContents.send('differential-analysis', 'limma')
+        }
+      },
+      {
+        label: 'QFeatures + limma',
+        click: async () => {
+          win?.webContents.send('differential-analysis', 'qfeatures-limma')
         }
       }
     ]

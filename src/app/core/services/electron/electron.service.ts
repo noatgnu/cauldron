@@ -17,6 +17,7 @@ import {platform} from "os";
 import {Options, PythonShell} from "python-shell";
 import * as child_process from "child_process";
 import {Job} from "embedded-queue";
+
 import {JobConstructorData} from "embedded-queue/dist/job";
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,8 @@ export class ElectronService {
   citationUtilityChannelSubject: Subject<string> = new Subject<string>()
   dimensionReductionChannelSubject: Subject<string> = new Subject<string>()
   curtainChannelSubject: Subject<string> = new Subject<string>()
+  differentialAnalysisSubject: Subject<string> = new Subject<string>()
+  fileSubject: Subject<string> = new Subject<string>()
   userDataPath: string = ""
   configPath: string = ""
   settings: Settings = new Settings()
@@ -54,6 +57,9 @@ export class ElectronService {
     //scriptPath: 'path/to/my/scripts',
     //args: ['value1', 'value2', 'value3']
   };
+  RPath: string = ""
+  RScriptPath: string = ""
+  scriptFolderPath: string = ""
   child_process!: typeof child_process;
   resourcePath: string = ""
   translatedPlatform: string = ""
@@ -94,6 +100,9 @@ export class ElectronService {
       })
       this.ipcRenderer.on('process-resource-path', (event, message) => {
         this.resourcePath = message
+        this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
+        this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
+        this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
       })
       this.ipcRenderer.on('close', (event, message) => {
         this.closeSubject.next(true)
@@ -110,6 +119,12 @@ export class ElectronService {
       })
       this.ipcRenderer.on('curtain', (event, message) => {
         this.curtainChannelSubject.next(message)
+      })
+      this.ipcRenderer.on('differential-analysis', (event, message) => {
+        this.differentialAnalysisSubject.next(message)
+      })
+      this.ipcRenderer.on('file', (event, message) => {
+        this.fileSubject.next(message)
       })
       this.ipcRenderer.send('get-process-resource-path', 'python')
       this.ipcRenderer.on('python-path', (event, message) => {

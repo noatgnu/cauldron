@@ -2,23 +2,20 @@
   <form [formGroup]="form">
     <div class="form-group">
       <div class="form-floating mb-2">
-        <input id="resultFolder" readonly type="text" class="form-control" formControlName="python_path">
-        <label for="resultFolder">Python Path</label>
+        <input id="resultFolder" readonly type="text" class="form-control" formControlName="r_path">
+        <label for="resultFolder">R Executable Path</label>
       </div>
     </div>
   </form>
   @if (processing) {
     <ngb-progressbar type="info" [value]="100" [striped]="true" [animated]="true">Processing...</ngb-progressbar>
-    <textarea class="form-control mt-2" [rows]="10" readonly [(ngModel)]="installProcess">
-
-    </textarea>
   } @else {
-    <button class="btn btn-primary" (click)="installRequirements()">Install Base Packages</button>
+
   }
-  @if (pipList.length > 0) {
+  @if (packagesList.length > 0) {
     <div class="card mt-2">
       <div class="card-header">
-        Python Installed Packages
+        R Installed Packages
       </div>
       <div class="card-body">
         <div class="table">
@@ -30,7 +27,7 @@
             </tr>
             </thead>
             <tbody>
-              @for (pip of pipList; track pip.name) {
+              @for (pip of packagesList; track pip.name) {
                 <tr>
                   <td>{{ pip.name }}</td>
                   <td>{{ pip.version }}</td>

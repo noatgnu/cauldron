@@ -1,0 +1,75 @@
+<div class="modal-header">
+  <h5 class="modal-title">Differential analysis with limma</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-1">
+    <div class="form-floating">
+      <input type="text" class="form-control" formControlName="input_file" id="input_file">
+      <label for="input_file">Input file</label>
+      <button type="button" class="btn btn-primary mt-1" (click)="openFile('input_file')">Browse</button>
+    </div>
+    <div class="form-floating">
+      <input type="text" class="form-control" formControlName="annotation_file" id="annotation_file">
+      <label for="annotation_file">Annotation file</label>
+      <button type="button" class="btn btn-primary mt-1" (click)="openFile('annotation_file')">Browse</button>
+    </div>
+    <div class="form-group">
+      <label for="index_col">Index Columns</label>
+      <select class="form-select" formControlName="index_col" id="index_col" multiple>
+        @for (c of columns; track c) {
+          <option value="{{c}}">{{c}}</option>
+        }
+      </select>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" formControlName="log2" id="log2">
+      <label class="form-check-label" for="log2">Log2 transformation</label>
+    </div>
+  </form>
+  <p><b>Contrast:</b></p>
+
+  @if (comparisons.length > 0) {
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Condition A</th>
+        <th scope="col">Condition B</th>
+        <th scope="col">Label</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (c of comparisons; track c){
+          <tr>
+            <td>
+              <select class="form-select" [(ngModel)]="c.condition_A">
+                @for (c of conditions; track c) {
+                  <option value="{{c}}">{{c}}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <select class="form-select" [(ngModel)]="c.condition_B">
+                @for (c of conditions; track c) {
+                  <option value="{{c}}">{{c}}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <input type="text" class="form-control" [(ngModel)]="c.comparison_label">
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+  <button type="button" class="btn btn-primary" (click)="addContrast()"><i class="bi bi-plus"></i></button>
+
+  <div>
+
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-primary" (click)="loadExample()">Load Example</button>
+</div>

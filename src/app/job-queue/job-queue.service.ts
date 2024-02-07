@@ -2,8 +2,9 @@ import {Injectable, NgZone} from '@angular/core';
 import {ElectronService} from "../core/services";
 import {Job, Queue} from "embedded-queue";
 import {Accession, Parser} from "uniprotparserjs";
-import { fromCSV, IDataFrame, ISeries, Series} from "data-forge";
+import {DataFrame, fromCSV, IDataFrame, ISeries, Series} from "data-forge";
 import {ToastService} from "../toast-container/toast.service";
+import {Subject} from "rxjs";
 
 
 @Injectable({
@@ -13,6 +14,7 @@ export class JobQueueService {
   queue!: Queue;
   jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string, name?: string}} = {}
   previousJobMap: {[key: string]: {completed: boolean, job: any, error: boolean, type: string, name?: string}} = {}
+  jobQueueUpdateSubject: Subject<boolean> = new Subject<boolean>()
   processingCount = 0
   completedCount = 0
   errorCount: number = 0
@@ -48,6 +50,7 @@ export class JobQueueService {
           this.processingCount--
           this.errorCount++
           this.toastService.show("Job Failed", `Job ID: ${job.id}. Job Type: ${job.type}`)
+          this.jobQueueUpdateSubject.next(true)
         })
 
       }
@@ -63,6 +66,7 @@ export class JobQueueService {
           this.processingCount--
           this.completedCount++
           this.toastService.show("Job Complete", `Job ID: ${job.id}. Job Type: ${job.type}`)
+          this.jobQueueUpdateSubject.next(true)
 
         })
       }
@@ -70,17 +74,19 @@ export class JobQueueService {
     queue.on(
       this.electronService.embeddedQueue.Event.Start, (job: Job) => {
         this.zone.run(() => {
-          this.jobMap[job.id].name = "Untitled job"
+
           console.log("Job Started")
           console.log("Job ID: "+job.id)
           console.log("Job Type: "+job.type)
           // @ts-ignore
           this.jobMap[job.id] = {completed: false, job: job, error: false, type: job.data.type}
+          this.jobMap[job.id].name = "Untitled job"
           const result = this.electronService.fs.mkdirSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id), {recursive: true})
           const data = JSON.stringify(job.data)
           this.electronService.fs.writeFileSync(this.electronService.path.join(this.electronService.settings.resultStoragePath, job.id, "job_data.json"), data)
           this.processingCount++
           this.toastService.show("Job Started", `Job ID: ${job.id}. Job Type: ${job.type}`)
+          this.jobQueueUpdateSubject.next(true)
         })
       }
     )
@@ -90,6 +96,7 @@ export class JobQueueService {
     await this.setupCitationUtilityJobQueue(queue)
     await this.setupDimensionalityReductionJobQueue(queue)
     await this.setupCurtainJobQueue(queue)
+    await this.setupDiffentialAnalysisJobQueue(queue)
     this.queue = queue
   }
 
@@ -234,15 +241,12 @@ export class JobQueueService {
           ]
           console.log(options.args)
           await job.setProgress(50, 100)
-          try {
-            const result_normal =  await this.electronService.pythonShell.run([
-              this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
-              "scripts",
-              "normalization.py"
-            ].join(this.electronService.path.sep), options)
-          }catch (e) {
-            console.log(e)
-          }
+
+          const result_normal =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "normalization.py"
+          ].join(this.electronService.path.sep), options)
 
           await job.setProgress(100, 100)
       }
@@ -384,6 +388,91 @@ export class JobQueueService {
           ].join(this.electronService.path.sep), options_ms)
           await job.setProgress(100, 100)
           break
+      }
+    }, 1)
+  }
+
+  async setupDiffentialAnalysisJobQueue(queue: Queue) {
+    queue.process("differential-analysis", async (job: Job) => {
+      const data = job.data
+      // @ts-ignore
+      switch (data.type) {
+        case "limma":
+          const options = Object.assign({}, this.electronService.pythonOptions)
+          const payload = data as {input_file: string, annotation_file: string, index_col: string[], log2: boolean, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[], type: string}
+          this.electronService.fs.mkdirSync([this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep), {recursive: true})
+          // write comparison_file
+
+          const comparisonFile = new DataFrame(payload.comparisons)
+          // @ts-ignore
+          this.electronService.fs.writeFileSync([this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep), comparisonFile.toCSV({delimiter: "\t"}))
+
+          options.args = [
+            "--input_file", payload.input_file,
+            "--annotation_file", payload.annotation_file,
+            "--index_col", payload.index_col.join(","),
+            "--comparison_file", [this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--r_home", this.electronService.RPath.replace(this.electronService.path.sep+ ["bin", "R.exe"].join(this.electronService.path.sep), "")
+          ]
+          if (payload.log2) {
+            options.args.push("--log2")
+          }
+
+
+          console.log(options.args)
+          await job.setProgress(50, 100)
+
+          const result =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "differential_analysis.py"
+          ].join(this.electronService.path.sep), options)
+
+
+          await job.setProgress(100, 100)
+          break
+        case "qfeatures-limma":
+          const options_qf = Object.assign({}, this.electronService.pythonOptions)
+          const payload_qf = data as {input_file: string, annotation_file: string, index_col: string[], log2: boolean, rowFilter: number, colFilter: number, imputation: string, normalization: string, aggregateMethod: string, aggregateColumn: string, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[], type: string}
+          this.electronService.fs.mkdirSync([this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep), {recursive: true})
+          // write comparison_file
+
+          const comparisonFile_qf = new DataFrame(payload_qf.comparisons)
+          // @ts-ignore
+          this.electronService.fs.writeFileSync([this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep), comparisonFile_qf.toCSV({delimiter: "\t"}))
+
+          options_qf.args = [
+            "--input_file", payload_qf.input_file,
+            "--annotation_file", payload_qf.annotation_file,
+            "--index_col", payload_qf.index_col.join(","),
+            "--comparison_file", [this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--r_home", this.electronService.RPath.replace(this.electronService.path.sep+ ["bin", "R.exe"].join(this.electronService.path.sep), ""),
+            "--row_filter", payload_qf.rowFilter.toString(),
+            "--col_filter", payload_qf.colFilter.toString(),
+            "--impute", payload_qf.imputation,
+            "--normalize", payload_qf.normalization,
+          ]
+          if (payload_qf.log2) {
+            options_qf.args.push("--log2")
+          }
+          if (payload_qf.aggregateColumn) {
+            options_qf.args.push("--aggregate_column")
+            options_qf.args.push(payload_qf.aggregateColumn)
+          }
+          if (payload_qf.aggregateMethod) {
+            options_qf.args.push("--aggregate_method")
+            options_qf.args.push(payload_qf.aggregateMethod)
+          }
+          console.log(options_qf.args)
+          await job.setProgress(50, 100)
+
+          const result_qf =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "differential_analysis.py"
+          ].join(this.electronService.path.sep), options_qf)
       }
     }, 1)
   }

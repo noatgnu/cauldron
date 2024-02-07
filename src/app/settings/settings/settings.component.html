@@ -25,6 +25,9 @@
         <div [ngClass]="{'list-group-item list-group-item-action': true, 'active': selectedOption=='Python'}" (click)="selectedOption='Python'">
           <p>Python</p>
         </div>
+        <div [ngClass]="{'list-group-item list-group-item-action': true, 'active': selectedOption=='R'}" (click)="selectedOption='R'">
+          <p>R</p>
+        </div>
       </div>
     </div>
     <div class="d-flex flex-column border-black w-100" style="height: 100%">
@@ -38,6 +41,8 @@
           <app-data-storage-settings (changed)="this.changeStatus['Data Storage']=$event"></app-data-storage-settings>
         } @else if (selectedOption=='Python') {
           <app-python-settings></app-python-settings>
+        } @else if (selectedOption=='R') {
+          <app-r-settings></app-r-settings>
         }
       </div>
 

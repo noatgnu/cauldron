@@ -25,6 +25,13 @@
       ]
     },
     {
+      "from": "./app/bin/${os}/R-Portable",
+      "to": "./bin/${os}/R-Portable",
+      "filter": [
+        "**/*"
+      ]
+    },
+    {
       "from": "./app/requirements.txt",
       "to": "./requirements.txt"
     },
@@ -46,7 +53,8 @@
   "win": {
     "icon": "dist/assets/icons/favicon.ico",
     "target": [
-      "portable"
+      "portable",
+      "msi"
     ],
     "signAndEditExecutable": true,
     "publisherName": [

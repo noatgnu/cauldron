@@ -10,6 +10,7 @@ import {PhatePlotModalComponent} from "../../modals/phate-plot-modal/phate-plot-
 import {SampleAnnotationComponent} from "../../modals/sample-annotation/sample-annotation.component";
 import {DataFrame, IDataFrame} from "data-forge";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {JobRemovalModalComponent} from "../../modals/job-removal-modal/job-removal-modal.component";
 
 @Component({
   selector: 'app-job-queue',
@@ -53,10 +54,16 @@ export class JobQueueComponent {
     console.log(this.form)
     this.jobMap = this.jobQueue.jobMap
     this.previousJobMap = this.jobQueue.previousJobMap
-
+    this.displayJob = Object.values(this.jobMap).reverse()
     this.form.controls['jobSearch'].valueChanges.subscribe((value: string) => {
-
       this.jobSearch(value)
+    })
+    this.jobQueue.jobQueueUpdateSubject.asObservable().subscribe((value: boolean) => {
+      if (this.queueName === "previous") {
+        this.displayJob = Object.values(this.previousJobMap).reverse()
+      } else {
+        this.displayJob = Object.values(this.jobMap).reverse()
+      }
 
     })
   }
@@ -159,6 +166,33 @@ export class JobQueueComponent {
       }).reverse()
     } else {
       this.displayJob = Object.values(jobMap).reverse()
+    }
+  }
+
+  remove() {
+    if (this.clickedJob) {
+      const jobId = this.clickedJob.job.id
+
+      const ref = this.modal.open(JobRemovalModalComponent)
+      ref.closed.subscribe((result: boolean) => {
+        if (result) {
+          this.clickedJob = undefined
+          // @ts-ignore
+          this.displayJob = this.displayJob.filter((job) => job.job.id !== jobId)
+          // @ts-ignore
+          const folder = this.electronService.path.join(this.settings.resultStoragePath, jobId)
+          this.electronService.fs.rmdirSync(folder, {recursive: true})
+          if (this.queueName === "current") {
+            // @ts-ignore
+            delete this.jobMap[jobId]
+          } else {
+            // @ts-ignore
+            delete this.previousJobMap[jobId]
+          }
+          this.electronService.saveJobQueue(this.jobMap)
+        }
+      })
+
     }
   }
 

@@ -28,6 +28,11 @@
               }
               <div>Type: {{j.type}}</div>
               <div>ID: {{j.job.id}}</div>
+              @if (j.job.state) {
+                @if (j.job.state==='ACTIVE') {
+                  <ngb-progressbar [value]="j.job.progress" type="primary" [striped]="true" [animated]="true">In progress</ngb-progressbar>
+                }
+              }
             </div>
           </div>
         }
@@ -54,6 +59,9 @@
           <p><b>Job Completed At</b>: {{clickedJob.job.completedAt}}</p>
           <p><b>Job Duration</b>: {{clickedJob.job.duration}}</p>
           <p><b>Job Failed At</b>: {{clickedJob.job.failedAt}}</p>
+
+          <button class="btn btn-danger" (click)="remove()"><i class="bi bi-trash"></i></button>
+
           @if (getJobStatus(clickedJob.job)) {
             <p><b>Job Result Location</b>: <i class="bi bi-folder" (click)="openFileExplorerAt(clickedJob.job.id)"></i></p>
           }
@@ -72,19 +80,18 @@
               @case ('phate') {
                 <button class="btn btn-primary" (click)="openPHATEPlot()"><i class="bi bi-graph-up"></i> PHATE</button>
               }
-
             }
           </div>
 
           @if (clickedJob.job.progress) {
 
             @if (!jobMap[clickedJob.job.id].completed && !jobMap[clickedJob.job.id].error) {
-              <ngb-progressbar [value]="clickedJob.job.progress" type="primary"></ngb-progressbar>
+              <ngb-progressbar [value]="clickedJob.job.progress" type="primary" [striped]="true" [animated]="true">In progress</ngb-progressbar>
             } @else {
               @if (jobMap[clickedJob.job.id].error) {
-                <ngb-progressbar [value]="100" type="danger"></ngb-progressbar>
+                <ngb-progressbar [value]="100" type="danger">Failed</ngb-progressbar>
               } @else if (jobMap[clickedJob.job.id].completed) {
-                <ngb-progressbar [value]="100" type="success"></ngb-progressbar>
+                <ngb-progressbar [value]="100" type="success">Completed</ngb-progressbar>
               } @else {
                 <ngb-progressbar [value]="100" type="primary"></ngb-progressbar>
               }

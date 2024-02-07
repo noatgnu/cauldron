@@ -57,7 +57,10 @@ export class SampleAnnotationComponent {
 
   parseFromClipboard(column: 'Sample'|'Condition') {
     navigator.clipboard.readText().then(text => {
-      const lines = text.split(/\r?\n/).filter(l => l.length > 0)
+      let lines = text.split(/\r?\n/).filter(l => l.length > 0)
+      if (text.includes('\t')) {
+        lines = text.split(/\t/)
+      }
 
       if (this._annotation.length === lines.length) {
         for (let i = 0; i < lines.length; i++) {

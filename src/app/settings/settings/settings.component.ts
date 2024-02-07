@@ -3,6 +3,7 @@ import {NgClass} from "@angular/common";
 import {DataStorageSettingsComponent} from "../data-storage-settings/data-storage-settings.component";
 import {ElectronService} from "../../core/services";
 import {PythonSettingsComponent} from "../python-settings/python-settings.component";
+import {RSettingsComponent} from "../r-settings/r-settings.component";
 
 @Component({
   selector: 'app-settings',
@@ -10,7 +11,8 @@ import {PythonSettingsComponent} from "../python-settings/python-settings.compon
   imports: [
     NgClass,
     DataStorageSettingsComponent,
-    PythonSettingsComponent
+    PythonSettingsComponent,
+    RSettingsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
