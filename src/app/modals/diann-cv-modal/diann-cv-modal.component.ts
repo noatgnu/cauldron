@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ElectronService} from "../../core/services";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-diann-cv-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './diann-cv-modal.component.html',
   styleUrl: './diann-cv-modal.component.scss'
@@ -56,5 +58,9 @@ export class DiannCvModalComponent {
     this.form.controls['pg_matrix_file'].setValue(this.electronService.path.join(diannFolder, 'Reports.pg_matrix.tsv'))
     this.form.controls['log_file'].setValue(this.electronService.path.join(diannFolder, 'Reports.log.txt'))
     this.form.controls['annotation_file'].setValue(this.electronService.path.join(diannFolder, 'annotation.txt'))
+  }
+
+  updateFormWithSelected(e: string, control: string) {
+    this.form.controls[control].setValue(e)
   }
 }

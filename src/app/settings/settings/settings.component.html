@@ -43,6 +43,8 @@
           <app-python-settings></app-python-settings>
         } @else if (selectedOption=='R') {
           <app-r-settings></app-r-settings>
+        } @else if (selectedOption=='CURTAIN Backend') {
+          <app-curtain-settings (changed)="this.changeStatus['CURTAIN Backend']=$event"></app-curtain-settings>
         }
       </div>
 

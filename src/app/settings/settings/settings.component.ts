@@ -4,6 +4,7 @@ import {DataStorageSettingsComponent} from "../data-storage-settings/data-storag
 import {ElectronService} from "../../core/services";
 import {PythonSettingsComponent} from "../python-settings/python-settings.component";
 import {RSettingsComponent} from "../r-settings/r-settings.component";
+import {CurtainSettingsComponent} from "../curtain-settings/curtain-settings.component";
 
 @Component({
   selector: 'app-settings',
@@ -12,7 +13,8 @@ import {RSettingsComponent} from "../r-settings/r-settings.component";
     NgClass,
     DataStorageSettingsComponent,
     PythonSettingsComponent,
-    RSettingsComponent
+    RSettingsComponent,
+    CurtainSettingsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'

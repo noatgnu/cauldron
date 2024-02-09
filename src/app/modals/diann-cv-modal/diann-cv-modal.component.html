@@ -3,48 +3,44 @@
 </div>
 <div class="modal-body">
   <form [formGroup]="form">
-    <div class="form-group">
-      <label for="pr_matrix">Reports.pr_matrix.tsv file</label>
-      <div class="d-flex gap-1">
-        <div>
-          <button type="button" class="btn btn-primary" (click)="browse('pr_matrix_file')">Browse</button>
-        </div>
-        <div class="flex-grow-1">
-          <input type="text" class="form-control" id="pr_matrix" aria-describedby="pr_matrixHelp" formControlName="pr_matrix_file" readonly>
-        </div>
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" id="pr_matrix_path" formControlName="pr_matrix_path" placeholder="PR File path">
+      <label for="pr_matrix_path">File path (Reports.pr_matrix.tsv)</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="browse('pr_matrix_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'pr_matrix_path')"></app-imported-file-selection>
       </div>
     </div>
-    <div class="form-group">
-      <label for="pg_matrix">Reports.pg_matrix.tsv file</label>
-      <div class="d-flex gap-1">
-        <div>
-          <button type="button" class="btn btn-primary" (click)="browse('pg_matrix_file')">Browse</button>
-        </div>
-        <div class="flex-grow-1">
-          <input type="text" class="form-control" id="pg_matrix" aria-describedby="pg_matrixHelp" formControlName="pg_matrix_file" readonly>
-        </div>
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" id="pg_matrix_file" formControlName="pg_matrix_file" placeholder="PG File path">
+      <label for="pg_matrix_file">File path (Reports.pg_matrix.tsv)</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="browse('pg_matrix_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'pg_matrix_path')"></app-imported-file-selection>
       </div>
     </div>
-    <div class="form-group">
-      <label for="log_file">Reports.log.txt file</label>
-      <div class="d-flex gap-1">
-        <div>
-          <button type="button" class="btn btn-primary" (click)="browse('log_file')">Browse</button>
-        </div>
-        <div class="flex-grow-1">
-          <input type="text" class="form-control" id="log_file" aria-describedby="log_fileHelp" formControlName="log_file" readonly>
-        </div>
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" id="log_file" formControlName="log_file" placeholder="PG File path">
+      <label for="log_file">File path (Reports.log.txt)</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="browse('log_file')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'log_file')"></app-imported-file-selection>
       </div>
     </div>
-    <div class="form-group">
-      <label for="annotation_file">Annotation file</label>
-      <div class="d-flex gap-1">
-        <div>
-          <button type="button" class="btn btn-primary" (click)="browse('annotation_file')">Browse</button>
-        </div>
-        <div class="flex-grow-1">
-          <input type="text" class="form-control" id="annotation_file" aria-describedby="annotation_fileHelp" formControlName="annotation_file" readonly>
-        </div>
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" id="annotation_file" formControlName="annotation_file" placeholder="PG File path">
+      <label for="annotation_file">File path (annotation.txt)</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="browse('annotation_file')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'annotation_file')"></app-imported-file-selection>
       </div>
     </div>
   </form>

@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ElectronService} from "../../core/services";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-imputation-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './imputation-modal.component.html',
   styleUrl: './imputation-modal.component.scss'
@@ -54,6 +56,9 @@ export class ImputationModalComponent {
         }
       }
     }
+  }
 
+  updateFormWithSelected(e: string, control: string) {
+    this.form.controls[control].setValue(e)
   }
 }

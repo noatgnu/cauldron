@@ -245,8 +245,7 @@ function createWindow(): BrowserWindow {
       message: 'Are you sure you want to quit?'
     }).then(result => {
       if (result.response === 0) {
-        win?.destroy()
-        app.quit()
+        win?.webContents.send('shutdown', 'shutdown')
       }
     })
   })
@@ -312,6 +311,10 @@ try {
     })
   })
 
+  ipcMain.on('shutdown-complete', (event, arg) => {
+    win?.destroy()
+    app.quit()
+  })
 } catch (e) {
   // Catch Error
   // throw e;

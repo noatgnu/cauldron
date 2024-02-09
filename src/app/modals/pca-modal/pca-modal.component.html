@@ -6,7 +6,12 @@
     <div class="form-floating">
       <input type="text" id="input_file" readonly class="form-control" formControlName="input_file" placeholder="input_file">
       <label for="input_file">File Path</label>
-      <button type="button" class="btn btn-primary mt-1" (click)="openFile()">Open</button>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile()">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'input_file')"></app-imported-file-selection>
+      </div>
     </div>
     <div class="form-group">
       <label for="columns">Sample Columns</label>

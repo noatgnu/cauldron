@@ -1,0 +1,12 @@
+@if (files.length > 0) {
+  <div class="form-floating">
+    <select class="form-select" (change)="selectFile($event)">
+      <option value="" selected>Choose a file...</option>
+      @for (f of files; track f) {
+        <option value="{{f.path}}">{{f.name}}</option>
+      }
+    </select>
+    <label>Select an imported file</label>
+  </div>
+}
+

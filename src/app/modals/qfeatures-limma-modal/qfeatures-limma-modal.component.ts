@@ -4,13 +4,15 @@ import {SharedModule} from "../../shared/shared.module";
 import {DataFrame, IDataFrame} from "data-forge";
 import {ElectronService} from "../../core/services";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-qfeatures-limma-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './qfeatures-limma-modal.component.html',
   styleUrl: './qfeatures-limma-modal.component.scss'
@@ -121,5 +123,9 @@ export class QfeaturesLimmaModalComponent {
 
   addContrast() {
     this.comparisons.push({condition_A: '', condition_B: '', comparison_label: ''})
+  }
+
+  updateFormWithSelected(e: string, formControl: string) {
+    this.form.controls[formControl].setValue(e)
   }
 }

@@ -3,13 +3,15 @@ import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, V
 import {ElectronService} from "../../core/services";
 import {DataFrame, IDataFrame} from "data-forge";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-limma-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './limma-modal.component.html',
   styleUrl: './limma-modal.component.scss'
@@ -113,5 +115,9 @@ export class LimmaModalComponent {
 
   addContrast() {
     this.comparisons.push({condition_A: '', condition_B: '', comparison_label: ''})
+  }
+
+  updateFormWithSelected(e: string, formControl: string) {
+    this.form.controls[formControl].setValue(e)
   }
 }

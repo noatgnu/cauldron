@@ -6,15 +6,23 @@
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="file_path" formControlName="pr_file_path" placeholder="PR File path">
       <label for="file_path">File path (Reports.pr_matrix.tsv)</label>
-      <button type="button" class="btn btn-primary mt-1" (click)="openFile('pr_file_path')">Browse</button>
     </div>
-
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('pr_file_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'pr_file_path')"></app-imported-file-selection>
+      </div>
+    </div>
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="report_file_path" formControlName="report_file_path" placeholder="Report Path">
       <label for="report_file_path">Report path (Reports.tsv)</label>
-      <button type="button" class="btn btn-primary mt-1" (click)="openFile('report_file_path')">Browse</button>
     </div>
-
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('report_file_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'report_file_path')"></app-imported-file-selection>
+      </div>
+    </div>
     <div class="form-floating">
       <input type="text" formControlName="modification_of_interests" class="form-control" id="modification_of_interests" placeholder="Modification of interests">
       <label for="modification_of_interests">Modification of interests</label>

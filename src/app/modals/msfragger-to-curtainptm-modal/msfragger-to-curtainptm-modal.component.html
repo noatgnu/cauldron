@@ -6,7 +6,12 @@
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="file_path" formControlName="file_path" placeholder="File path">
       <label for="file_path">File path</label>
-      <button type="button" class="btn btn-primary mt-1" (click)="openFile('file_path')">Browse</button>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('file_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
+      </div>
     </div>
     <div class="form-group">
       <label for="index_col">
@@ -31,7 +36,12 @@
     <div class="form-floating">
       <input type="text" readonly class="form-control" id="fasta_file" formControlName="fasta_file" placeholder="Fasta path">
       <label for="fasta_file">Fasta path (optional)</label>
-      <button type="button" class="btn btn-primary mt-1" (click)="openFile('fasta_file')">Browse</button>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('fasta_file')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'fasta_file')"></app-imported-file-selection>
+      </div>
     </div>
   </form>
 </div>

@@ -1,21 +1,23 @@
 import { Component } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ElectronService} from "../../core/services";
 import {NgTemplateOutlet} from "@angular/common";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-normalization-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './normalization-modal.component.html',
   styleUrl: './normalization-modal.component.scss'
 })
 export class NormalizationModalComponent {
-  form = this.fb.group({
+  form: FormGroup = this.fb.group({
     file_path: new FormControl<string>("", Validators.required),
     columns_name: new FormControl<string[]>([], Validators.required),
     scaler_type: new FormControl<string>("robust", Validators.required),
@@ -57,5 +59,8 @@ export class NormalizationModalComponent {
       }
     }
 
+  }
+  updateFormWithSelected(e: string, control: string) {
+    this.form.controls[control].setValue(e)
   }
 }

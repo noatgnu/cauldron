@@ -1,19 +1,21 @@
 import {Component, NgZone} from '@angular/core';
-import {FormBuilder, FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ElectronService} from "../../core/services";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-pca-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './pca-modal.component.html',
   styleUrl: './pca-modal.component.scss'
 })
 export class PcaModalComponent {
-  form = this.fb.group({
+  form: FormGroup = this.fb.group({
     input_file: new FormControl<string>('', Validators.required),
     columns_name: new FormControl<string[]>([], Validators.required),
     n_components: new FormControl<number>(2, [Validators.min(2), Validators.max(3), Validators.required]),
@@ -72,5 +74,9 @@ export class PcaModalComponent {
     })
     this.form.controls['n_components'].setValue(2)
     this.form.controls['log2'].setValue(true)
+  }
+
+  updateFormWithSelected(e: string, formControl: string) {
+    this.form.controls[formControl].setValue(e)
   }
 }

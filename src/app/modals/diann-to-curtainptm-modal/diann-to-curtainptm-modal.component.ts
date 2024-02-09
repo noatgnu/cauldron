@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ElectronService} from "../../core/services";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-diann-to-curtainptm-modal',
   standalone: true,
   imports: [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './diann-to-curtainptm-modal.component.html',
   styleUrl: './diann-to-curtainptm-modal.component.scss'
@@ -60,5 +62,9 @@ export class DiannToCurtainptmModalComponent {
     )
     this.form.controls['pr_file_path'].setValue(this.electronService.path.join(diannFolder, 'Reports.pr_matrix.tsv'))
     this.form.controls['report_file_path'].setValue(this.electronService.path.join(diannFolder, 'Reports.tsv'))
+  }
+
+  updateFormWithSelected(e: string, control: string) {
+    this.form.controls[control].setValue(e)
   }
 }

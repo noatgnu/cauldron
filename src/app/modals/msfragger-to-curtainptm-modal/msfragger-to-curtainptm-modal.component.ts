@@ -3,13 +3,15 @@ import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} fr
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ElectronService} from "../../core/services";
 import {SharedModule} from "../../shared/shared.module";
+import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 
 @Component({
   selector: 'app-msfragger-to-curtainptm-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    ImportedFileSelectionComponent
   ],
   templateUrl: './msfragger-to-curtainptm-modal.component.html',
   styleUrl: './msfragger-to-curtainptm-modal.component.scss'
@@ -52,5 +54,9 @@ export class MsfraggerToCurtainptmModalComponent {
         }
       }
     })
+  }
+
+  updateFormWithSelected(e: string, control: string) {
+    this.form.controls[control].setValue(e)
   }
 }

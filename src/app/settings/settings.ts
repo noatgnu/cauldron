@@ -11,6 +11,7 @@ export class Settings {
     "#fdcce5",
     "#8bd3c7",
   ]
+  curtainBackendUrl: string = "https://celsus.muttsu.xyz"
   constructor() {
 
   }

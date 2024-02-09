@@ -7,7 +7,12 @@
       <div class="form-group">
         <label id="inputFile">Input File</label>
         <input type="text" readonly formControlName="file_path" class="form-control">
-        <button type="button" class="btn btn-primary mt-1" (click)="openFile()">Browse</button>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" (click)="openFile()">Browse</button>
+        <div class="flex-grow-1">
+          <app-imported-file-selection (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
+        </div>
       </div>
       <div class="form-group">
         <label for="selectedCols">Select Sample Columns</label>

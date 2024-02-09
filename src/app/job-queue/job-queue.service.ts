@@ -28,6 +28,13 @@ export class JobQueueService {
     this.electronService.closeSubject.asObservable().subscribe((value: boolean) => {
       this.saveJobQueue()
     })
+    this.electronService.shutdownSubject.asObservable().subscribe((value: string) => {
+      if (value === 'shutdown') {
+        this.shutdown().then(() => {
+          this.electronService.ipcRenderer.send("shutdown-complete", "shutdown-complete")
+        })
+      }
+    })
   }
 
   async createJobQueue() {
