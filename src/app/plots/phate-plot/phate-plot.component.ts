@@ -5,7 +5,6 @@ import {DataFrame, IDataFrame} from "data-forge";
 import {ElectronService} from "../../core/services";
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {SampleAnnotationComponent} from "../../modals/sample-annotation/sample-annotation.component";
 import {NgxColorsModule} from "ngx-colors";
 import {ConditionColorAssignmentComponent} from "../condition-color-assignment/condition-color-assignment.component";
 PlotlyModule.plotlyjs = PlotlyJS;

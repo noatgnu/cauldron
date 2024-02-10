@@ -11,6 +11,7 @@ import {SampleAnnotationComponent} from "../../modals/sample-annotation/sample-a
 import {DataFrame, IDataFrame} from "data-forge";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {JobRemovalModalComponent} from "../../modals/job-removal-modal/job-removal-modal.component";
+import {VolcanoPlotModalComponent} from "../../modals/volcano-plot-modal/volcano-plot-modal.component";
 
 @Component({
   selector: 'app-job-queue',
@@ -196,5 +197,16 @@ export class JobQueueComponent {
     }
   }
 
+  openVolcanoPlotModal() {
+    if (this.clickedJob) {
+      if (this.clickedJob.type === 'limma') {
+        const ref = this.modal.open(VolcanoPlotModalComponent, {scrollable: true, size: 'xl'})
+        const jobFolder = this.electronService.path.join(this.settings.resultStoragePath, this.clickedJob.job.id)
+        const jobData = JSON.parse(this.electronService.fs.readFileSync(this.electronService.path.join(jobFolder, 'job_data.json')).toString())
+        ref.componentInstance.indexCols = jobData.index_col
+        ref.componentInstance.differentialAnalysisFile = this.electronService.path.join(jobFolder, 'differential_analysis.txt')
+      }
+    }
+  }
   protected readonly Object = Object;
 }

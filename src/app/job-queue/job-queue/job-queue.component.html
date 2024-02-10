@@ -71,7 +71,12 @@
 
           <div class="d-flex mb-1 flex-row gap-1">
             @if (clickedJob.completed) {
-              <button class="btn btn-primary" (click)="openAnnotationModal()">Assign Condition</button>
+              @if (clickedJob.type==='limma') {
+                <button class="btn btn-primary" (click)="openVolcanoPlotModal()"><i class="bi bi-graph-up"></i> Volcano</button>
+              } @else {
+                <button class="btn btn-primary" (click)="openAnnotationModal()">Assign Condition</button>
+              }
+
             }
             @switch (clickedJob.type) {
               @case ('pca') {
