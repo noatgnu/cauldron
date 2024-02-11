@@ -2,5 +2,37 @@
   <h5 class="modal-title">Volcano Plot</h5>
 </div>
 <div class="modal-body">
-  <app-volcano-plot [data]="df" [revision]="revision"></app-volcano-plot>
+  <div class="d-flex justify-content-center">
+    <div class="flex-grow-1">
+      <app-volcano-plot [data]="df" [revision]="revision"></app-volcano-plot>
+    </div>
+    <div class="flex-grow-0">
+      <form [formGroup]="form" class="d-flex flex-column gap-2" style="width: 300px">
+        <div class="form-floating">
+          <select class="form-select" id="indexCols" multiple formControlName="indexCols" style="height: 100px">
+            @for (i of indexCols; track i) {
+              <option [value]="i">{{ i }}</option>
+            }
+          </select>
+          <label for="indexCols">Primary Ids Column</label>
+        </div>
+        @if (comparisons.length > 0) {
+          <div class="form-floating">
+            <select class="form-select" id="comparison" formControlName="comparison">
+              @for (c of comparisons; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+            <label for="comparison">Comparison</label>
+          </div>
+        }
+
+      </form>
+    </div>
+
+  </div>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
 </div>

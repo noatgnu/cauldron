@@ -3,12 +3,15 @@ import {VolcanoPlotComponent} from "../../plots/volcano-plot/volcano-plot.compon
 import {ElectronService} from "../../core/services";
 import {DataFrame, IDataFrame} from "data-forge";
 import {VolcanoDataRow} from "../../plots/volcano-plot/volcano-data-row";
+import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-volcano-plot-modal',
   standalone: true,
   imports: [
-    VolcanoPlotComponent
+    VolcanoPlotComponent,
+    ReactiveFormsModule
   ],
   templateUrl: './volcano-plot-modal.component.html',
   styleUrl: './volcano-plot-modal.component.scss'
@@ -19,11 +22,27 @@ export class VolcanoPlotModalComponent {
 
   @Input() pValueColumn: string = 'adj.P.Val'
   @Input() comparisonColumn: string = 'comparison'
-  @Input() indexCols: string[] = []
+  _indexCols: string[] = []
+  @Input() set indexCols(value: string[]) {
+    this._indexCols = value
+    this.form.controls['indexCols'].setValue(value)
+  }
+  get indexCols(): string[] {
+    return this._indexCols
+  }
 
   comparisons: string[] = []
 
   dfFile: IDataFrame<number, any> = new DataFrame()
+
+  form = this.fb.group({
+    pValueCutoff: new FormControl(0.05),
+    log2FoldChangeCutoff: new FormControl(0.6),
+    pValueColumn: new FormControl(this.pValueColumn),
+    log2FoldChangeColumn: new FormControl(this.log2FoldChangeColumn),
+    comparison: new FormControl(this.comparisons[0]),
+    indexCols: new FormControl(this.indexCols)
+  })
 
   @Input() set differentialAnalysisFile(value: string) {
     this._differentialAnalysisFile = value
@@ -32,16 +51,24 @@ export class VolcanoPlotModalComponent {
         this.dfFile = df
         this.comparisons = this.dfFile.getSeries(this.comparisonColumn).distinct().toArray()
         const data: VolcanoDataRow[] = []
+        console.log(this.form.controls['comparison'].value)
+        let comparison = this.form.controls['comparison'].value
+        if (comparison === null) {
+          comparison = this.comparisons[0]
+          this.form.controls['comparison'].setValue(comparison)
+        }
         df.where((row: any) => {
-          return row[this.comparisonColumn] === this.comparisons[0]
+          return row[this.comparisonColumn] === comparison
         }).forEach((row: any) => {
-          const newRow: VolcanoDataRow = {
-            label: this.indexCols.map((col) => row[col]).join("|"),
-            index: this.indexCols.map((col) => row[col]).join("|"),
-            x: row[this.log2FoldChangeColumn],
-            y: -Math.log10(row[this.pValueColumn])
+          if (this.form.controls.indexCols.value) {
+            const newRow: VolcanoDataRow = {
+              label: this.form.controls['indexCols'].value[0],
+              index: this.form.controls['indexCols'].value.map((col) => row[col]).join("|"),
+              x: row[this.log2FoldChangeColumn],
+              y: -Math.log10(row[this.pValueColumn])
+            }
+            data.push(newRow)
           }
-          data.push(newRow)
         })
         this.df = new DataFrame(data)
         this.revision++
@@ -54,8 +81,12 @@ export class VolcanoPlotModalComponent {
   }
   df: IDataFrame<number, VolcanoDataRow> = new DataFrame()
 
-  constructor(private electronService: ElectronService) {
+  constructor(private electronService: ElectronService, private fb: FormBuilder, private modal: NgbActiveModal) {
 
+  }
+
+  close() {
+    this.modal.dismiss()
   }
 
 }

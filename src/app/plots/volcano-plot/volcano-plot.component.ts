@@ -32,9 +32,9 @@ export class VolcanoPlotComponent {
       }
 
       if (row.y >= this.pValueCutoff) {
-        group += "; -Log10(p-value) < " + this.pValueCutoff
+        group += "; -Log10(p-value) < " + this.pValueCutoff.toFixed(2)
       } else {
-        group += "; -Log10(p-value) >= " + this.pValueCutoff
+        group += "; -Log10(p-value) >= " + this.pValueCutoff.toFixed(2)
       }
       this.cutoffGroupMap[row.index] = group
     })
