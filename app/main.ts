@@ -122,6 +122,12 @@ const menuTemplate = [
         click: async () => {
           win?.webContents.send('dimensionality-reduction', 'phate')
         }
+      },
+      {
+        label: 'Correlation Matrix',
+        click: async () => {
+          win?.webContents.send('dimensionality-reduction', 'correlation-matrix')
+        }
       }
     ]
   },

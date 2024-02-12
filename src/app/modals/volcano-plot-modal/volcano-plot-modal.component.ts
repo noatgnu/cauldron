@@ -4,14 +4,15 @@ import {ElectronService} from "../../core/services";
 import {DataFrame, IDataFrame} from "data-forge";
 import {VolcanoDataRow} from "../../plots/volcano-plot/volcano-data-row";
 import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-volcano-plot-modal',
   standalone: true,
   imports: [
     VolcanoPlotComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbProgressbar
   ],
   templateUrl: './volcano-plot-modal.component.html',
   styleUrl: './volcano-plot-modal.component.scss'
@@ -43,11 +44,12 @@ export class VolcanoPlotModalComponent {
     comparison: new FormControl(this.comparisons[0]),
     indexCols: new FormControl(this.indexCols)
   })
-
+  assembling: boolean = false
   @Input() set differentialAnalysisFile(value: string) {
     this._differentialAnalysisFile = value
     if (this.electronService.fs.existsSync(this._differentialAnalysisFile)) {
       this.electronService.dataForgeFS.readFile(this._differentialAnalysisFile).parseCSV().then((df: IDataFrame<number, any>) => {
+        this.assembling = true
         this.dfFile = df
         this.comparisons = this.dfFile.getSeries(this.comparisonColumn).distinct().toArray()
         const data: VolcanoDataRow[] = []
@@ -62,15 +64,16 @@ export class VolcanoPlotModalComponent {
         }).forEach((row: any) => {
           if (this.form.controls.indexCols.value) {
             const newRow: VolcanoDataRow = {
-              label: this.form.controls['indexCols'].value[0],
+              label: row[this.form.controls['indexCols'].value[0]],
               index: this.form.controls['indexCols'].value.map((col) => row[col]).join("|"),
-              x: row[this.log2FoldChangeColumn],
-              y: -Math.log10(row[this.pValueColumn])
+              x: parseFloat(row[this.log2FoldChangeColumn]),
+              y: -Math.log10(parseFloat(row[this.pValueColumn]))
             }
             data.push(newRow)
           }
         })
         this.df = new DataFrame(data)
+        this.assembling = false
         this.revision++
       })
     }

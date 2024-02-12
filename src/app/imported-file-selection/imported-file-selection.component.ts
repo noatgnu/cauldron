@@ -14,6 +14,7 @@ export class ImportedFileSelectionComponent {
   files = this.electronService.files
 
   @Output() selected: EventEmitter<string> = new EventEmitter<string>()
+  @Output() columns: EventEmitter<string[]> = new EventEmitter<string[]>()
   constructor(private electronService: ElectronService, private fb: FormBuilder) {
 
   }
@@ -22,6 +23,14 @@ export class ImportedFileSelectionComponent {
     const fileInput = file.target as HTMLSelectElement
     if (fileInput.value !== "") {
       this.selected.emit(fileInput.value)
+      const line = this.electronService.getFirstLine(fileInput.value)
+      if (line) {
+        if (fileInput.value.endsWith('.csv')) {
+          this.columns.emit(line.split(','))
+        } else {
+          this.columns.emit(line.split('\t'))
+        }
+      }
     }
   }
 

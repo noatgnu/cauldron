@@ -20,24 +20,44 @@ export class VolcanoPlotComponent {
   @Input() selection: {[key: string]: {selectionLabels: string[], color: string}} = {}
 
   cutoffGroupMap: {[key: string]: string} = {}
+  _title: string = "Volcano Plot"
+
+  @Input() set title(value: string) {
+    if (value) {
+      this._title = value
+    }
+
+  }
+
+  get title(): string {
+    return this._title
+  }
 
   @Input() set data(value: IDataFrame<number, VolcanoDataRow>) {
     this._data = value
-    this._data.forEach((row) => {
-      let group = ""
-      if (Math.abs(row.x) >= this.log2FoldChangeCutoff) {
-        group += "Log2FC >= " + this.log2FoldChangeCutoff
-      } else {
-        group += "Log2FC < " + this.log2FoldChangeCutoff
-      }
+    if (this._data.count() > 0) {
+      console.log(this._data.getSeries("x"))
+      this.maxLog2FC = this._data.getSeries("x").max()
+      this.minLog2FC = this._data.getSeries("x").min()
+      this.maxPValue = this._data.getSeries("y").max()
+      this.minPValue = this._data.getSeries("y").min()
+      this._data.forEach((row) => {
+        let group = ""
+        if (Math.abs(row.x) >= this.log2FoldChangeCutoff) {
+          group += "Log2FC >= " + this.log2FoldChangeCutoff
+        } else {
+          group += "Log2FC < " + this.log2FoldChangeCutoff
+        }
 
-      if (row.y >= this.pValueCutoff) {
-        group += "; -Log10(p-value) < " + this.pValueCutoff.toFixed(2)
-      } else {
-        group += "; -Log10(p-value) >= " + this.pValueCutoff.toFixed(2)
-      }
-      this.cutoffGroupMap[row.index] = group
-    })
+        if (row.y >= this.pValueCutoff) {
+          group += "; -Log10(p-value) < " + this.pValueCutoff.toFixed(2)
+        } else {
+          group += "; -Log10(p-value) >= " + this.pValueCutoff.toFixed(2)
+        }
+        this.cutoffGroupMap[row.index] = group
+      })
+    }
+
   }
 
   get data(): IDataFrame<number, VolcanoDataRow> {
@@ -45,6 +65,11 @@ export class VolcanoPlotComponent {
   }
 
   _revision: number = 0
+
+  maxLog2FC: number = 0
+  minLog2FC: number = 0
+  maxPValue: number = 0
+  minPValue: number = 0
 
   @Input() set revision(value: number) {
     this.draw()
@@ -61,19 +86,44 @@ export class VolcanoPlotComponent {
 
   graphData: any = []
   graphLayout: any = {
-    title: 'Volcano Plot',
+    height: 700, width: 700,
     xaxis: {
-      title: 'Log2 Fold Change'
+      title: "<b>Log2FC</b>",
+      tickmode: "linear",
+      ticklen: 5,
+      showgrid: false,
+      visible: true,
+      //zerolinecolor: "#ffffff"
     },
     yaxis: {
-      title: '-Log10(p-value)'
-    }
+      title: "<b>-log10(p-value)</b>",
+      tickmode: "linear",
+      ticklen: 5,
+      showgrid: false,
+      visible: true,
+      showticklabels: true,
+      zeroline: true,
+    },
+    annotations: [],
+    showlegend: true, legend: {
+      orientation: 'h'
+    },
+    title: {
+      text: this.title,
+      font: {
+        size: 24,
+        family: "Arial, sans-serif"
+      },
+    },
+    shapes: [],
   }
   constructor() {
 
   }
 
   draw() {
+    this.graphLayout.title = this.title
+    let shapes: any[] = []
     const graphData: any = {}
     console.log(this.data)
     this.data.forEach((row) => {
@@ -113,6 +163,46 @@ export class VolcanoPlotComponent {
         })
       }
     })
+
+    //add vertical cutoff lines on both sides
+    shapes.push({
+      type: 'line',
+      x0: this.log2FoldChangeCutoff,
+      y0: 0,
+      x1: this.log2FoldChangeCutoff,
+      y1: this.maxPValue + 1,
+      line: {
+        width: 1,
+        dash: 'dot'
+      }
+    })
+    shapes.push({
+      type: 'line',
+      x0: -this.log2FoldChangeCutoff,
+      y0: 0,
+      x1: -this.log2FoldChangeCutoff,
+      y1: this.maxPValue + 1,
+      line: {
+        width: 1,
+        dash: 'dot'
+      }
+    })
+    shapes.push({
+      type: 'line',
+      x0: this.minLog2FC-1,
+      y0: this.pValueCutoff,
+      x1: this.maxLog2FC+1,
+      y1: this.pValueCutoff,
+      line: {
+        width: 1,
+        dash: 'dot'
+      }
+    })
+
+    this.graphLayout.shapes = shapes
+    this.graphLayout.xaxis.range = [this.minLog2FC - 1, this.maxLog2FC + 1]
+    this.graphLayout.yaxis.range = [0, this.maxPValue + 1]
+
     this.graphData = Object.values(graphData)
     this._revision++
   }

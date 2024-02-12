@@ -1,0 +1,104 @@
+<div class="modal-header">
+  <h5 class="modal-title">Correlation Matrix</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-1">
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" formControlName="file_path" id="file_path">
+      <label for="file_path">Input file</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('file_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (columns)="columns=$event" (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
+      </div>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" formControlName="plot_only" id="plot_only">
+      <label for="plot_only">Plot only (if the input file is already a correlation matrix)</label>
+    </div>
+    <div class="form-floating">
+      <select id="index_col" formControlName="index_col" class="form-select">
+        @for (c of columns; track c) {
+          <option value="{{c}}">{{c}}</option>
+        }
+      </select>
+      <label for="index_col">
+        @if (form.value["plot_only"]) {
+          Correlation matrix vertical row name column
+        } @else {
+          Index Column
+        }
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="sample_cols">
+        @if (form.value["plot_only"]) {
+          Correlation matrix vertical column name
+        } @else {
+          Sample Columns
+        }
+
+      </label>
+      <select id="sample_cols" formControlName="sample_cols" class="form-select" multiple>
+        @for (c of columns; track c) {
+          <option value="{{c}}">{{c}}</option>
+        }
+      </select>
+
+    </div>
+    @if (!form.value["plot_only"]) {
+      <div class="form-floating">
+        <select id="method" formControlName="method" class="form-select">
+          @for (m of correlationMethod; track m) {
+            <option value="{{m}}">{{m}}</option>
+          }
+        </select>
+        <label for="method">Correlation Method</label>
+      </div>
+    }
+    <div class="form-floating">
+      <select id="order" formControlName="order" class="form-select">
+        @for (o of orderList; track o) {
+          <option value="{{o}}">{{ o }}</option>
+        }
+      </select>
+      <label for="order">Sort Order</label>
+    </div>
+    @if (form.value["order"] === "hclust") {
+      <div class="form-floating">
+        <select id="hclust_method" formControlName="hclust_method" class="form-select">
+          @for (h of hclusteringMethod; track h) {
+            <option value="{{h}}">{{h}}</option>
+          }
+        </select>
+        <label for="hclust_method">HClust Method</label>
+      </div>
+    }
+    <div class="form-floating">
+      <select id="presenting_method" formControlName="presenting_method" class="form-select">
+        @for (p of presentingMethod; track p) {
+          <option value="{{p}}">{{p}}</option>
+        }
+      </select>
+      <label for="presenting_method">Presenting Method</label>
+    </div>
+    <div class="form-floating">
+      <select id="correlationPlotShape" formControlName="cor_shape" class="form-select">
+        @for (s of correlationPlotShape; track s) {
+          <option value="{{s}}">{{s}}</option>
+        }
+      </select>
+      <label for="correlationPlotShape">Correlation Plot Shape</label>
+    </div>
+    <div class="form-floating">
+      <input id="min_value" type="number" formControlName="min_value" class="form-control" max="1" min="0">
+      <label for="min_value">Minimum Color Scale Value</label>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" (click)="loadExample()">Load Example</button>
+  <button class="btn btn-primary" (click)="submit()">Submit</button>
+  <button class="btn btn-secondary" (click)="close()">Close</button>
+</div>

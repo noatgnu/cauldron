@@ -328,6 +328,42 @@ export class JobQueueService {
           ].join(this.electronService.path.sep), options_pca)
           await job.setProgress(100, 100)
           break
+        case "correlation-matrix":
+          const options_cm = Object.assign({}, this.electronService.pythonOptions)
+          const payload_cm = data as {file_path: string, sample_cols: string[], index_col: string, method: string, min_value?: number, order?: string, hclust_method: string, presenting_method: string, cor_shape: string, plot_only: string, type: string}
+          options_cm.args = [
+            "--file_path", payload_cm.file_path,
+            "--sample_cols", payload_cm.sample_cols.join(","),
+            "--index_col", payload_cm.index_col,
+            "--method", payload_cm.method,
+            "--hclust_method", payload_cm.hclust_method,
+            "--presenting_method", payload_cm.presenting_method,
+            "--cor_shape", payload_cm.cor_shape,
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--r_home", this.electronService.RPath.replace(this.electronService.path.sep+ ["bin", "R.exe"].join(this.electronService.path.sep), "")
+          ]
+
+          if (payload_cm.min_value) {
+            options_cm.args.push("--min_value")
+            options_cm.args.push(payload_cm.min_value.toString())
+          }
+          if (payload_cm.order) {
+            options_cm.args.push("--order")
+            options_cm.args.push(payload_cm.order)
+          }
+          if (payload_cm.plot_only) {
+            options_cm.args.push("--plot_only")
+          }
+
+          await job.setProgress(50, 100)
+          const result_cm =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "correlation_matrix.py"
+          ].join(this.electronService.path.sep), options_cm)
+
+          await job.setProgress(100, 100)
+          break
       }
     }, 1)
   }

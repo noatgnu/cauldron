@@ -19,6 +19,7 @@ import {LimmaModalComponent} from "./modals/limma-modal/limma-modal.component";
 import {SampleAnnotationComponent} from "./modals/sample-annotation/sample-annotation.component";
 import {DataFrame} from "data-forge";
 import {QfeaturesLimmaModalComponent} from "./modals/qfeatures-limma-modal/qfeatures-limma-modal.component";
+import {CorrelationMatrixModalComponent} from "./modals/correlation-matrix-modal/correlation-matrix-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -129,6 +130,25 @@ export class AppComponent {
               })
             })
             break
+          case 'correlation-matrix':
+            zone.run(() => {
+              const ref = this.modal.open(CorrelationMatrixModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'dimensionality-reduction', data:{
+                    file_path: result.file_path,
+                    sample_cols: result.sample_cols,
+                    index_col: result.index_col,
+                    method: result.method,
+                    min_value: result.min_value,
+                    order: result.order,
+                    hclust_method: result.hclust_method,
+                    presenting_method: result.presenting_method,
+                    cor_shape: result.cor_shape,
+                    plot_only: result.plot_only,
+                    type: 'correlation-matrix'
+                  }})
+              })
+            })
         }
       })
       this.electronService.curtainChannelSubject.asObservable().subscribe((data) => {

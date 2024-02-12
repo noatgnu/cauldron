@@ -10,7 +10,7 @@
     <div class="d-flex gap-2">
       <button type="button" class="btn btn-primary" (click)="openFile('file_path')">Browse</button>
       <div class="flex-grow-1">
-        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
+        <app-imported-file-selection (columns)="columns = $event" (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
       </div>
     </div>
     <div class="form-group">

@@ -4,7 +4,14 @@
 <div class="modal-body">
   <div class="d-flex justify-content-center">
     <div class="flex-grow-1">
-      <app-volcano-plot [data]="df" [revision]="revision"></app-volcano-plot>
+      @if (assembling) {
+        <ngb-progressbar type="primary" [value]="100" [striped]="true" [animated]="true">Loading...</ngb-progressbar>
+      } @else {
+        @if (form.value.comparison && df && df.count() > 0) {
+          <app-volcano-plot [title]="form.value.comparison" [data]="df" [revision]="revision"></app-volcano-plot>
+        }
+      }
+
     </div>
     <div class="flex-grow-0">
       <form [formGroup]="form" class="d-flex flex-column gap-2" style="width: 300px">
