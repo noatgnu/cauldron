@@ -1,5 +1,6 @@
 export class Settings {
   resultStoragePath: string = "./"
+  APIKey: string = ""
   defaultColorList: string[] = [
     "#fd7f6f",
     "#7eb0d5",
@@ -12,6 +13,10 @@ export class Settings {
     "#8bd3c7",
   ]
   curtainBackendUrl: string = "https://celsus.muttsu.xyz"
+
+  privateKey: string = ""
+  publicKey: string = ""
+
   constructor() {
 
   }

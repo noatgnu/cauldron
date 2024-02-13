@@ -20,6 +20,7 @@ import {SampleAnnotationComponent} from "./modals/sample-annotation/sample-annot
 import {DataFrame} from "data-forge";
 import {QfeaturesLimmaModalComponent} from "./modals/qfeatures-limma-modal/qfeatures-limma-modal.component";
 import {CorrelationMatrixModalComponent} from "./modals/correlation-matrix-modal/correlation-matrix-modal.component";
+import {FuzzyClusteringModalComponent} from "./modals/fuzzy-clustering-modal/fuzzy-clustering-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -146,6 +147,18 @@ export class AppComponent {
                     cor_shape: result.cor_shape,
                     plot_only: result.plot_only,
                     type: 'correlation-matrix'
+                  }})
+              })
+            })
+          case 'fuzzy-clustering-pca':
+            zone.run(() => {
+              const ref = this.modal.open(FuzzyClusteringModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueueService.queue.createJob({type: 'dimensionality-reduction', data:{
+                    file_path: result.file_path,
+                    annotation_path: result.annotation_path,
+                    center_count: result.center_count,
+                    type: 'fuzzy-clustering-pca'
                   }})
               })
             })

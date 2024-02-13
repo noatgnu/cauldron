@@ -1,0 +1,46 @@
+<div class="modal-header">
+  <h5 class="modal-title">Fuzzy Clustering</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    <div class="form-floating">
+      <input type="text" id="file_path" readonly class="form-control" formControlName="file_path" placeholder="file_path">
+      <label for="file_path">File Path</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('file_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'file_path')"></app-imported-file-selection>
+      </div>
+    </div>
+    <div class="form-floating">
+      <input type="text" id="annotation_path" readonly class="form-control" formControlName="annotation_path" placeholder="annotation_path">
+      <label for="annotation_path">File Path</label>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-primary" (click)="openFile('annotation_path')">Browse</button>
+      <div class="flex-grow-1">
+        <app-imported-file-selection (selected)="updateFormWithSelected($event, 'annotation_path')"></app-imported-file-selection>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="center_count">Number of cluster</label>
+      <select class="form-select" id="center_count" formControlName="center_count" multiple>
+        <option [value]="2">2</option>
+        <option [value]="3">3</option>
+        <option [value]="4">4</option>
+        <option [value]="5">5</option>
+        <option [value]="6">6</option>
+        <option [value]="7">7</option>
+        <option [value]="8">8</option>
+        <option [value]="9">9</option>
+        <option [value]="10">10</option>
+      </select>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-primary" (click)="loadExample()">Load Examples</button>
+  <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

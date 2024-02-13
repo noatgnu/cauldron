@@ -1,0 +1,23 @@
+<div class="modal-header">
+  <h5 class="modal-title">Fuzzy Cluter PCA Plot</h5>
+</div>
+<div class="modal-body">
+  <div class="d-flex flex-row gap-2">
+    <div class="flex-grow-1">
+      <app-fuzzy-clustering-pca-plot [data]="data" [revision]="revision"></app-fuzzy-clustering-pca-plot>
+    </div>
+    <div class="flex-grow-0">
+      <form [formGroup]="form" class="d-flex flex-column gap-2">
+        <div class="form-floating">
+          <select class="form-select" id="selectedFile" formControlName="selectedFile">
+            @for (f of filePathList; track f) {
+              <option [value]="f">{{f.split(sepPath)[f.split(sepPath).length-1]}}</option>
+            }
+          </select>
+          <label for="selectedFile">Select File</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+</div>

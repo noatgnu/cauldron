@@ -118,6 +118,12 @@ const menuTemplate = [
         }
       },
       {
+        label: 'Fuzzy Clustering (PCA)',
+        click: async () => {
+          win?.webContents.send('dimensionality-reduction', 'fuzzy-clustering-pca')
+        }
+      },
+      {
         label: 'PHATE',
         click: async () => {
           win?.webContents.send('dimensionality-reduction', 'phate')

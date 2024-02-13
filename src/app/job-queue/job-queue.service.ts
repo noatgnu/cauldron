@@ -49,6 +49,7 @@ export class JobQueueService {
     queue.on(
       this.electronService.embeddedQueue.Event.Failure, (job: Job, error: any) => {
         this.zone.run(() => {
+          console.log(error)
           console.log("Job Failed")
           console.log("Job ID: "+job.id)
           console.log("Job Type: "+job.type)
@@ -361,6 +362,25 @@ export class JobQueueService {
             "scripts",
             "correlation_matrix.py"
           ].join(this.electronService.path.sep), options_cm)
+
+          await job.setProgress(100, 100)
+          break
+        case "fuzzy-clustering-pca":
+          const options_fcm_pca = Object.assign({}, this.electronService.pythonOptions)
+          const payload_fcm_pca = data as {file_path: string, annotation_path: string, center_count: number[], type: string}
+          options_fcm_pca.args = [
+            "--file_path", payload_fcm_pca.file_path,
+            "--annotation_path", payload_fcm_pca.annotation_path,
+            "--center_count", payload_fcm_pca.center_count.join(","),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep)
+          ]
+
+          await job.setProgress(50, 100)
+          const result_fcm_pca =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "fuzz_clustering.py"
+          ].join(this.electronService.path.sep), options_fcm_pca)
 
           await job.setProgress(100, 100)
           break

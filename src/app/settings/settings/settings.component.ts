@@ -25,6 +25,8 @@ export class SettingsComponent {
   changeStatus: { [key: string]: boolean } = {
     "Data Storage": false,
     "CURTAIN Backend": false,
+    "Python": false,
+    "R": false
   }
 
   constructor(private electronService: ElectronService) { }

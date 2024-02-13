@@ -12,6 +12,12 @@ import {DataFrame, IDataFrame} from "data-forge";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {JobRemovalModalComponent} from "../../modals/job-removal-modal/job-removal-modal.component";
 import {VolcanoPlotModalComponent} from "../../modals/volcano-plot-modal/volcano-plot-modal.component";
+import {
+  FuzzyClusteringPcaPlotComponent
+} from "../../plots/fuzzy-clustering-pca-plot/fuzzy-clustering-pca-plot.component";
+import {
+  FuzzyClusteringPlotModalComponent
+} from "../../modals/fuzzy-clustering-plot-modal/fuzzy-clustering-plot-modal.component";
 
 @Component({
   selector: 'app-job-queue',
@@ -205,6 +211,26 @@ export class JobQueueComponent {
         const jobData = JSON.parse(this.electronService.fs.readFileSync(this.electronService.path.join(jobFolder, 'job_data.json')).toString())
         ref.componentInstance.indexCols = jobData.index_col
         ref.componentInstance.differentialAnalysisFile = this.electronService.path.join(jobFolder, 'differential_analysis.txt')
+      }
+    }
+  }
+
+  openFuzzyClusteringPCAPlot() {
+    if (this.clickedJob) {
+      if (this.clickedJob.type === 'fuzzy-clustering-pca') {
+        const ref = this.modal.open(FuzzyClusteringPlotModalComponent, {scrollable: true, size: 'xl'})
+        const jobFolder = this.electronService.path.join(this.settings.resultStoragePath, this.clickedJob.job.id)
+        const jobData = JSON.parse(this.electronService.fs.readFileSync(this.electronService.path.join(jobFolder, 'job_data.json')).toString())
+        const filePathList: string[] = []
+        // check if file exists
+        for (const c of jobData["center_count"]) {
+          const file = this.electronService.path.join(jobFolder, `fcm_${c}_clusters.txt`)
+          if (this.electronService.fs.existsSync(file)) {
+            filePathList.push(file)
+          }
+        }
+        console.log(filePathList)
+        ref.componentInstance.filePathList = filePathList
       }
     }
   }

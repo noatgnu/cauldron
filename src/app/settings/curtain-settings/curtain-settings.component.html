@@ -1,12 +1,20 @@
 <div class="container">
-  <form [formGroup]="form">
-    <div class="form-group">
-      <div class="form-floating mb-2">
-        <input id="resultFolder" type="text" class="form-control" formControlName="resultStoragePath">
-        <label for="resultFolder">Result Folder</label>
-      </div>
-
-
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    <div class="form-floating">
+      <input id="backendURL" type="text" class="form-control" formControlName="curtainBackendUrl">
+      <label for="backendURL">Curtain Backend URL</label>
+    </div>
+    <div class="form-floating">
+      <input id="APIKey" type="text" class="form-control" formControlName="APIKey">
+      <label for="APIKey">API Access Key</label>
+    </div>
+    <div class="form-floating">
+      <textarea class="form-control" formControlName="privateKey" id="privateKey" style="height: 200px"></textarea>
+      <label for="privateKey">RSA Private Key</label>
+    </div>
+    <div class="form-floating">
+      <textarea class="form-control" formControlName="publicKey" id="publicKey" style="height: 200px"></textarea>
+      <label for="publicKey">RSA Public Key</label>
     </div>
   </form>
 </div>
