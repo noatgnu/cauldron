@@ -105,6 +105,7 @@ export class JobQueueService {
     await this.setupDimensionalityReductionJobQueue(queue)
     await this.setupCurtainJobQueue(queue)
     await this.setupDiffentialAnalysisJobQueue(queue)
+    await this.setupStatisticalTestsJobQueue(queue)
     this.queue = queue
   }
 
@@ -539,7 +540,41 @@ export class JobQueueService {
       }
     }, 1)
   }
+  async setupStatisticalTestsJobQueue(queue: Queue) {
+    queue.process("statistical-tests", async (job: Job) => {
+      const data = job.data
+      // @ts-ignore
+      switch (data.type) {
+        case "estimation-plot":
+          const options = Object.assign({}, this.electronService.pythonOptions)
+          const payload = data as {input_file: string, annotation_file: string, index_col: string, log2: boolean, condition_order: string[], selected_protein: string, type: string}
+          this.electronService.fs.mkdirSync([this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep), {recursive: true})
+          options.args = [
+            "--file_path", payload.input_file,
+            "--sample_annotation", payload.annotation_file,
+            "--index_col", payload.index_col,
+            "--out_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--selected_protein", payload.selected_protein,
+            "--condition_order", payload.condition_order.join(",")
+          ]
+          if (payload.log2) {
+            options.args.push("--log2")
+          }
+          console.log(options.args)
+          await job.setProgress(50, 100)
 
+          const result =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "estimation_plot.py"
+          ].join(this.electronService.path.sep), options)
+
+          await job.setProgress(100, 100)
+          break
+
+      }
+    }, 1)
+  }
   async shutdown() {
     await this.queue.shutdown(1000)
   }

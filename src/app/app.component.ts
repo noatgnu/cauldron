@@ -21,6 +21,7 @@ import {DataFrame} from "data-forge";
 import {QfeaturesLimmaModalComponent} from "./modals/qfeatures-limma-modal/qfeatures-limma-modal.component";
 import {CorrelationMatrixModalComponent} from "./modals/correlation-matrix-modal/correlation-matrix-modal.component";
 import {FuzzyClusteringModalComponent} from "./modals/fuzzy-clustering-modal/fuzzy-clustering-modal.component";
+import {EstimationPlotModalComponent} from "./modals/estimation-plot-modal/estimation-plot-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -150,6 +151,7 @@ export class AppComponent {
                   }})
               })
             })
+            break
           case 'fuzzy-clustering-pca':
             zone.run(() => {
               const ref = this.modal.open(FuzzyClusteringModalComponent)
@@ -162,6 +164,7 @@ export class AppComponent {
                   }})
               })
             })
+            break
         }
       })
       this.electronService.curtainChannelSubject.asObservable().subscribe((data) => {
@@ -233,6 +236,25 @@ export class AppComponent {
               })
             })
             break
+        }
+      })
+      this.electronService.statsTestSubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'estimation-plot':
+            zone.run(() => {
+              const ref = this.modal.open(EstimationPlotModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'statistical-tests', data: {
+                    input_file: result.input_file,
+                    annotation_file: result.annotation_file,
+                    index_col: result.index_col,
+                    log2: result.log2,
+                    condition_order: result.condition_order,
+                    selected_protein: result.selected_protein,
+                    type: 'estimation-plot'
+                  }})
+              })
+            })
         }
       })
       this.electronService.fileSubject.asObservable().subscribe((data) => {

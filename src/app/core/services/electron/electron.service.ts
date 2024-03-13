@@ -43,6 +43,7 @@ export class ElectronService {
   differentialAnalysisSubject: Subject<string> = new Subject<string>()
   fileSubject: Subject<string> = new Subject<string>()
   shutdownSubject: Subject<string> = new Subject<string>()
+  statsTestSubject: Subject<string> = new Subject<string>()
   userDataPath: string = ""
   configPath: string = ""
   settings: Settings = new Settings()
@@ -127,9 +128,15 @@ export class ElectronService {
       this.ipcRenderer.on('file', (event, message) => {
         this.fileSubject.next(message)
       })
+      this.ipcRenderer.on('statistical-tests', (event, message) => {
+        this.statsTestSubject.next(message)
+      })
+
       this.ipcRenderer.on('shutdown', (event, message) => {
         this.shutdownSubject.next(message)
       })
+
+
       this.ipcRenderer.send('get-process-resource-path', 'python')
       this.ipcRenderer.on('python-path', (event, message) => {
         this.pythonPath = message

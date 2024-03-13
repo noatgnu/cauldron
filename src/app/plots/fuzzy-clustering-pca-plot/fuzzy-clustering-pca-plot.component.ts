@@ -51,17 +51,23 @@ export class FuzzyClusteringPcaPlotComponent {
     if (this.data.count() > 0) {
       const graphData: any[] = []
       this.data.groupBy(row => row.cluster).forEach((group) => {
-        graphData.push({
-          x: group.getSeries("x").toArray(),
-          y: group.getSeries("y").toArray(),
+        const data: any = {
+          x: [],
+          y: [],
+          text: [],
           mode: 'markers',
           type: 'scatter',
           name: `Cluster ${group.first().cluster}`
+        }
+        group.forEach((row) => {
+          data.x.push(row.x)
+          data.y.push(row.y)
+          data.text.push(`Sample:${row.Sample}<br>Condition:(${row.Condition})<br>Cluster:${row.cluster}`)
         })
+        graphData.push(data)
       })
       this.graphData = graphData
     }
-
   }
 
 }

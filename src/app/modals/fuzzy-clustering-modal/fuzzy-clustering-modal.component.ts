@@ -59,6 +59,7 @@ export class FuzzyClusteringModalComponent {
   }
 
   updateFormWithSelected(event: any, file_type: string) {
-    this.form.patchValue({[file_type]: event.file_path})
+    this.form.controls[file_type].setValue(event)
+
   }
 }

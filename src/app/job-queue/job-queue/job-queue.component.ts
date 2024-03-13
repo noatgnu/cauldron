@@ -221,6 +221,7 @@ export class JobQueueComponent {
         const ref = this.modal.open(FuzzyClusteringPlotModalComponent, {scrollable: true, size: 'xl'})
         const jobFolder = this.electronService.path.join(this.settings.resultStoragePath, this.clickedJob.job.id)
         const jobData = JSON.parse(this.electronService.fs.readFileSync(this.electronService.path.join(jobFolder, 'job_data.json')).toString())
+        const explainedVariance = JSON.parse(this.electronService.fs.readFileSync(this.electronService.path.join(jobFolder, 'explained_variance_ratio.json')).toString())
         const filePathList: string[] = []
         // check if file exists
         for (const c of jobData["center_count"]) {
@@ -231,6 +232,7 @@ export class JobQueueComponent {
         }
         console.log(filePathList)
         ref.componentInstance.filePathList = filePathList
+        ref.componentInstance.explainedVariance = explainedVariance
       }
     }
   }

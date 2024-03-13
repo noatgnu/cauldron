@@ -5,6 +5,7 @@ import {ElectronService} from "../../core/services";
 import {PythonSettingsComponent} from "../python-settings/python-settings.component";
 import {RSettingsComponent} from "../r-settings/r-settings.component";
 import {CurtainSettingsComponent} from "../curtain-settings/curtain-settings.component";
+import {ToastService} from "../../toast-container/toast.service";
 
 @Component({
   selector: 'app-settings',
@@ -29,15 +30,16 @@ export class SettingsComponent {
     "R": false
   }
 
-  constructor(private electronService: ElectronService) { }
+  constructor(private electronService: ElectronService, private toastService: ToastService) { }
   saveSettings() {
     this.electronService.saveConfigSettings()
     for (const key of Object.keys(this.changeStatus)) {
       this.changeStatus[key] = false
     }
-    console.log(this.electronService.settings)
+    this.toastService.show("Settings", "Settings saved successfully").then()
   }
   revertSettings() {
     this.electronService.loadConfigSettings(this.electronService.configPath)
+    this.toastService.show("Settings", "Settings reverted to previously saved version successfully").then()
   }
 }

@@ -38,6 +38,18 @@ export class CurtainSettingsComponent {
         this.changed.emit(true)
       }
     })
+    this.form.controls.privateKey.valueChanges.subscribe((value) => {
+      if (value) {
+        this.electronService.settings.privateKey = value
+        this.changed.emit(true)
+      }
+    })
+    this.form.controls.publicKey.valueChanges.subscribe((value) => {
+      if (value) {
+        this.electronService.settings.publicKey = value
+        this.changed.emit(true)
+      }
+    })
   }
 
 }

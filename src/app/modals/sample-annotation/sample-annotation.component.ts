@@ -57,6 +57,7 @@ export class SampleAnnotationComponent {
 
   parseFromClipboard(column: 'Sample'|'Condition') {
     navigator.clipboard.readText().then(text => {
+      text = text.trim()
       let lines = text.split(/\r?\n/).filter(l => l.length > 0)
       if (text.includes('\t')) {
         lines = text.split(/\t/)

@@ -25,7 +25,7 @@ export class FuzzyClusteringPlotModalComponent {
       this.form.controls["selectedFile"].setValue(this._filePathList[0])
     }
   }
-
+  @Input() explainedVariance: number[] = []
   get filePathList(): string[] {
     return this._filePathList
   }

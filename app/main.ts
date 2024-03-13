@@ -81,6 +81,17 @@ const menuTemplate = [
     ]
   },
   {
+    label: 'Statistical Tests',
+    submenu: [
+      {
+        label: 'Estimation Plot',
+        click: async () => {
+          win?.webContents.send('statistical-tests', 'estimation-plot')
+        }
+      }
+    ]
+  },
+  {
     label: 'DIA-NN',
     submenu: [
       {
@@ -274,6 +285,7 @@ function createWindow(): BrowserWindow {
 }
 
 try {
+  app.commandLine.appendSwitch('ignore-gpu-blacklist')
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -311,6 +323,8 @@ try {
   })
 
   ipcMain.on('install-python-packages', (event, arg) => {
+    console.log(pyPath)
+    console.log(['-m', 'pip', 'install', '-r', `${__dirname.replace(path.sep+"app.asar", "") + path.sep + 'requirements.txt'}`])
     const installProgress = child_process.spawn(`${pyPath}`, ['-m', 'pip', 'install', '-r', `${__dirname.replace(path.sep+"app.asar", "") + path.sep + 'requirements.txt'}`])
     installProgress.stdout.on('data', (data) => {
       win?.webContents.send('install-python-packages-progress', data.toString())

@@ -20,13 +20,13 @@
           <p>Data Storage @if(changeStatus['Data Storage']){<span class="badge bg-primary">changed</span>}</p>
         </div>
         <div [ngClass]="{'list-group-item list-group-item-action': true, 'active': selectedOption=='CURTAIN Backend'}" (click)="selectedOption='CURTAIN Backend'">
-          <p>CURTAIN Backend</p>
+          <p>CURTAIN Backend @if(changeStatus['CURTAIN Backend']){<span class="badge bg-primary">changed</span>}</p>
         </div>
         <div [ngClass]="{'list-group-item list-group-item-action': true, 'active': selectedOption=='Python'}" (click)="selectedOption='Python'">
-          <p>Python</p>
+          <p>Python @if(changeStatus['Python']){<span class="badge bg-primary">changed</span>}</p>
         </div>
         <div [ngClass]="{'list-group-item list-group-item-action': true, 'active': selectedOption=='R'}" (click)="selectedOption='R'">
-          <p>R</p>
+          <p>R @if(changeStatus['R']){<span class="badge bg-primary">changed</span>}</p>
         </div>
       </div>
     </div>
