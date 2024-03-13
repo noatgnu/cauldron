@@ -27,7 +27,7 @@ export class QfeaturesLimmaModalComponent {
     index_col: new FormControl([], Validators.required),
     log2: new FormControl(true),
     normalization: new FormControl("quantiles.robust", Validators.required),
-    imputation: new FormControl("knn", Validators.required),
+    imputation: new FormControl("RF", Validators.required),
     rowFilter: new FormControl(0.7, Validators.required),
     colFilter: new FormControl(0.7, Validators.required),
     aggregateColumn: new FormControl(""),

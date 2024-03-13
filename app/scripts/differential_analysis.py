@@ -29,14 +29,20 @@ def diff_analysis(input_file: str, output_folder: str, annotation_file: str, com
     coral.filter_missing_columns(col_filter)
     coral.prepare()
     coral.filter_missing_rows(row_filter)
-    if impute:
+    if impute != "knn":
         coral.impute(impute)
+        coral.export_df_from_R(os.path.join(output_folder, "imputed.txt").replace("\\", "/"))
     if log2:
         coral.log_transform()
     if aggregate_column:
         coral.aggregate_features(aggregate_column, aggregate_method)
+        coral.export_df_from_R(os.path.join(output_folder, "aggregated.txt").replace("\\", "/"))
     if normalize:
         coral.normalize(normalize)
+        coral.export_df_from_R(os.path.join(output_folder, "normalized.txt").replace("\\", "/"))
+    if impute == "knn":
+        coral.impute(impute)
+        coral.export_df_from_R(os.path.join(output_folder, "imputed.txt").replace("\\", "/"))
     coral.prepare_for_limma()
     result = []
     for d in coral.run_limma():

@@ -28,10 +28,15 @@ def est_plot(file_path: str, index_col: str, selected_protein: list[str], sample
 
     melted_df = df.melt(id_vars=[index_col], value_vars=sample_annotation.keys(), var_name="Sample", value_name="Value")
     melted_df["Condition"] = melted_df["Sample"].map(sample_annotation)
-    melted_df = melted_df.dropna()
+
     for g, d in melted_df.groupby(index_col):
         # replace special characters
         g = re.sub(r'[^\w\s]', '_', g)
+        # remove missing values if no values was detected in condition
+        for c in d["Condition"].unique():
+            if d[d["Condition"] == c]["Value"].isna().all():
+                d = d[d["Condition"] != c]
+
         if condition_order:
             d["Condition"] = pd.Categorical(d["Condition"], [i for i in condition_order if i in d["Condition"].values], ordered=True)
         else:
