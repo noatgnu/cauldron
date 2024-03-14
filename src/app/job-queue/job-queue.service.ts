@@ -106,6 +106,7 @@ export class JobQueueService {
     await this.setupCurtainJobQueue(queue)
     await this.setupDiffentialAnalysisJobQueue(queue)
     await this.setupStatisticalTestsJobQueue(queue)
+    await this.setupUtilityJobQueue(queue)
     this.queue = queue
   }
 
@@ -575,6 +576,38 @@ export class JobQueueService {
       }
     }, 1)
   }
+
+  async setupUtilityJobQueue(queue: Queue) {
+    queue.process("utilities", async (job: Job) =>  {
+      const data = job.data
+      // @ts-ignore
+      switch (data.type) {
+        case "check-peptide-in-library":
+          const options = Object.assign({}, this.electronService.pythonOptions)
+          const payload =  data as {fasta_file: string, peptide_column: string, file_path: string, min_length: number, miss_cleavage: number, type: string}
+          options.args = [
+            "--fasta_file", payload.fasta_file,
+            "--peptide_column", payload.peptide_column,
+            "--file_path", payload.file_path,
+            "--min_length", payload.min_length.toString(),
+            "--miss_cleavage", payload.miss_cleavage.toString(),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep)
+          ]
+
+          console.log(options.args)
+
+          await job.setProgress(50, 100)
+          const result =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "library_check_peptide.py"
+          ].join(this.electronService.path.sep), options)
+          await job.setProgress(100, 100)
+
+      }
+    }, 1)
+  }
+
   async shutdown() {
     await this.queue.shutdown(1000)
   }

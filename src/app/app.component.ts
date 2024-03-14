@@ -22,6 +22,9 @@ import {QfeaturesLimmaModalComponent} from "./modals/qfeatures-limma-modal/qfeat
 import {CorrelationMatrixModalComponent} from "./modals/correlation-matrix-modal/correlation-matrix-modal.component";
 import {FuzzyClusteringModalComponent} from "./modals/fuzzy-clustering-modal/fuzzy-clustering-modal.component";
 import {EstimationPlotModalComponent} from "./modals/estimation-plot-modal/estimation-plot-modal.component";
+import {
+  CheckPeptideInLibraryModalComponent
+} from "./modals/check-peptide-in-library-modal/check-peptide-in-library-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -287,6 +290,24 @@ export class AppComponent {
               })
             })
             break
+        }
+      })
+      this.electronService.utilitySubject.asObservable().subscribe((data) => {
+        switch (data) {
+          case 'check-peptide-in-library':
+            zone.run(() => {
+              const ref = this.modal.open(CheckPeptideInLibraryModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'utilities', data: {
+                    fasta_file: result.fasta_file,
+                    miss_cleavage: result.miss_cleavage,
+                    min_length: result.min_length,
+                    file_path: result.file_path,
+                    peptide_column: result.peptide_column,
+                    type: 'check-peptide-in-library'
+                  }})
+              })
+            })
         }
       })
 

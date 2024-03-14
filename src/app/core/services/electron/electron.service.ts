@@ -65,6 +65,7 @@ export class ElectronService {
   child_process!: typeof child_process;
   resourcePath: string = ""
   translatedPlatform: string = ""
+  utilitySubject: Subject<string> = new Subject<string>()
   constructor() {
     // Conditional imports
     if (this.isElectron) {
@@ -131,7 +132,9 @@ export class ElectronService {
       this.ipcRenderer.on('statistical-tests', (event, message) => {
         this.statsTestSubject.next(message)
       })
-
+      this.ipcRenderer.on('utilities', (event, message) => {
+        this.utilitySubject.next(message)
+      })
       this.ipcRenderer.on('shutdown', (event, message) => {
         this.shutdownSubject.next(message)
       })

@@ -81,6 +81,17 @@ const menuTemplate = [
     ]
   },
   {
+    label: 'Utilities',
+    submenu: [
+      {
+        label: 'Check Peptides in Library',
+        click: async () => {
+          win?.webContents.send('utilities', 'check-peptide-in-library')
+        }
+      }
+    ]
+  },
+  {
     label: 'Statistical Tests',
     submenu: [
       {
