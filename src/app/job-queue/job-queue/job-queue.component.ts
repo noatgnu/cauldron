@@ -41,6 +41,9 @@ export class JobQueueComponent {
   set queueName(value: "previous"|"current") {
     this._queueName = value
     if (value === "previous") {
+      if (Object.keys(this.jobQueue.previousJobMap).length !== 0) {
+        this.previousJobMap = this.jobQueue.previousJobMap
+      }
       this.displayJob = Object.values(this.previousJobMap).reverse()
     } else {
       this.displayJob = Object.values(this.jobMap).reverse()
@@ -61,6 +64,7 @@ export class JobQueueComponent {
     console.log(this.form)
     this.jobMap = this.jobQueue.jobMap
     this.previousJobMap = this.jobQueue.previousJobMap
+
     this.displayJob = Object.values(this.jobMap).reverse()
     this.form.controls['jobSearch'].valueChanges.subscribe((value: string) => {
       this.jobSearch(value)

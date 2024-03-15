@@ -88,6 +88,12 @@ const menuTemplate = [
         click: async () => {
           win?.webContents.send('utilities', 'check-peptide-in-library')
         }
+      },
+      {
+        label: 'Remap PTM Positions in Protein',
+        click: async () => {
+          win?.webContents.send('utilities', 'remap-ptm-positions')
+        }
       }
     ]
   },

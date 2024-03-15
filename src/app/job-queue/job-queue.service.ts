@@ -603,7 +603,30 @@ export class JobQueueService {
             "library_check_peptide.py"
           ].join(this.electronService.path.sep), options)
           await job.setProgress(100, 100)
-
+          break
+        case 'remap-ptm-positions':
+          const options_rem = Object.assign({}, this.electronService.pythonOptions)
+          const payload_rem = data as {input_file: string, peptide_column: string, position_in_peptide_column: string, fasta_file: string|null|undefined, uniprot_acc_column: string}
+          options_rem.args = [
+            "--input_file", payload_rem.input_file,
+            "--peptide_column", payload_rem.peptide_column,
+            "--position_in_peptide_column", payload_rem.position_in_peptide_column,
+            "--uniprot_acc_column", payload_rem.uniprot_acc_column,
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep)
+          ]
+          if (payload_rem.fasta_file !== "" && payload_rem.fasta_file !== null && payload_rem.fasta_file !== undefined) {
+            options_rem.args.push("--fasta_file")
+            options_rem.args.push(payload_rem.fasta_file)
+          }
+          console.log(options_rem.args)
+          await job.setProgress(50, 100)
+          const result_rem =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "remap_ptm.py"
+          ].join(this.electronService.path.sep), options_rem)
+          await job.setProgress(100, 100)
+          break
       }
     }, 1)
   }

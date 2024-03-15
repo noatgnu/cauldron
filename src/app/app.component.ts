@@ -25,6 +25,7 @@ import {EstimationPlotModalComponent} from "./modals/estimation-plot-modal/estim
 import {
   CheckPeptideInLibraryModalComponent
 } from "./modals/check-peptide-in-library-modal/check-peptide-in-library-modal.component";
+import {RemapPtmPositionsModalComponent} from "./modals/remap-ptm-positions-modal/remap-ptm-positions-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -306,6 +307,23 @@ export class AppComponent {
                     peptide_column: result.peptide_column,
                     type: 'check-peptide-in-library'
                   }})
+              })
+            })
+            break
+          case 'remap-ptm-positions':
+            zone.run(() => {
+              const ref = this.modal.open(RemapPtmPositionsModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({
+                  type: 'utilities', data: {
+                    fasta_file: result.fasta_file,
+                    input_file: result.file_path,
+                    peptide_column: result.peptide_column,
+                    position_in_peptide_column: result.position_in_peptide_column,
+                    uniprot_acc_column: result.uniprot_acc_column,
+                    type: 'remap-ptm-positions'
+                  }
+                })
               })
             })
         }
