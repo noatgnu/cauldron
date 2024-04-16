@@ -627,6 +627,32 @@ export class JobQueueService {
           ].join(this.electronService.path.sep), options_rem)
           await job.setProgress(100, 100)
           break
+        case "coverage-map":
+          const options_cm = Object.assign({}, this.electronService.pythonOptions)
+          const payload_cm = data as {fasta_file: string, file_path: string, uniprot_acc_column: string, sequence_column: string, index_column: string, value_columns: string[], type: string, }
+          options_cm.args = [
+            "--input_file", payload_cm.file_path,
+            "--uniprot_acc_column", payload_cm.uniprot_acc_column,
+            "--sequence_column", payload_cm.sequence_column,
+            "--index_column", payload_cm.index_column,
+            "--value_columns", payload_cm.value_columns.join(","),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep)
+          ]
+
+          if (payload_cm.fasta_file !== "" && payload_cm.fasta_file !== null && payload_cm.fasta_file !== undefined) {
+            options_cm.args.push("--fasta_file")
+            options_cm.args.push(payload_cm.fasta_file)
+          }
+
+          console.log(options_cm.args)
+          await job.setProgress(50, 100)
+          const result_cm =  await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "get_coverage.py"
+          ].join(this.electronService.path.sep), options_cm)
+          await job.setProgress(100, 100)
+          break
       }
     }, 1)
   }

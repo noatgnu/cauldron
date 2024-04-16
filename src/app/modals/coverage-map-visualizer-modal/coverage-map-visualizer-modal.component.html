@@ -1,0 +1,41 @@
+<div class="modal-header">
+  <h5 class="modal-title">Coverage Map Visualizer</h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" (ngSubmit)="viewData()">
+    <div class="d-flex flex-row gap-2">
+      <div class="form-floating">
+        <select class="form-select" id="accession" formControlName="accession">
+          <option [value]="null">Select a protein</option>
+          @for (a of _coverageData.getSeries('MatchACC').distinct(); track a) {
+            <option value="{{a}}">{{a}}</option>
+          }
+        </select>
+        <label for="accession">Protein</label>
+      </div>
+      <div class="form-floating">
+        <select class="form-select" id="sample" formControlName="sample" multiple style="height: 100px">
+          @for (s of _coverageData.getSeries('RawFile').distinct(); track s) {
+            <option value="{{s}}">{{s}}</option>
+          }
+        </select>
+        <label for="sample">Sample</label>
+      </div>
+      <div>
+        <button class="btn btn-primary" type="submit">View</button>
+      </div>
+
+    </div>
+
+
+    @if (form.valid && selectedSequence!=='' && highlightPositions.length > 0) {
+      <app-coverage-plot [sequence]="selectedSequence" [data]="selectedData"></app-coverage-plot>
+      <div class="d-flex flex-row justify-content-center w-100 overflow-auto" style="max-height: 500px">
+        <app-sequence-viewer [sequence]="selectedSequence" [highlight]="highlightPositions"></app-sequence-viewer>
+      </div>
+
+    }
+  </form>
+
+
+</div>

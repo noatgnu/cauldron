@@ -94,6 +94,12 @@ const menuTemplate = [
         click: async () => {
           win?.webContents.send('utilities', 'remap-ptm-positions')
         }
+      },
+      {
+        label: 'Coverage Map',
+        click: async () => {
+          win?.webContents.send('utilities', 'coverage-map')
+        }
       }
     ]
   },

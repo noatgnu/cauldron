@@ -26,6 +26,7 @@ import {
   CheckPeptideInLibraryModalComponent
 } from "./modals/check-peptide-in-library-modal/check-peptide-in-library-modal.component";
 import {RemapPtmPositionsModalComponent} from "./modals/remap-ptm-positions-modal/remap-ptm-positions-modal.component";
+import {CoverageMapModalComponent} from "./modals/coverage-map-modal/coverage-map-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -324,6 +325,22 @@ export class AppComponent {
                     type: 'remap-ptm-positions'
                   }
                 })
+              })
+            })
+            break
+          case 'coverage-map':
+            zone.run(() => {
+              const ref = this.modal.open(CoverageMapModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'utilities', data: {
+                    fasta_file: result.fasta_file,
+                    file_path: result.file_path,
+                    sequence_column: result.sequence_column,
+                    index_column: result.index_column,
+                    uniprot_acc_column: result.uniprot_acc_column,
+                    value_columns: result.value_columns,
+                    type: 'coverage-map'
+                  }})
               })
             })
         }

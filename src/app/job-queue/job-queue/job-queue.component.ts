@@ -18,6 +18,9 @@ import {
 import {
   FuzzyClusteringPlotModalComponent
 } from "../../modals/fuzzy-clustering-plot-modal/fuzzy-clustering-plot-modal.component";
+import {
+  CoverageMapVisualizerModalComponent
+} from "../../modals/coverage-map-visualizer-modal/coverage-map-visualizer-modal.component";
 
 @Component({
   selector: 'app-job-queue',
@@ -240,5 +243,19 @@ export class JobQueueComponent {
       }
     }
   }
+
+  openCoverageMap() {
+    if (this.clickedJob) {
+      if (this.clickedJob.type === 'coverage-map') {
+        const ref = this.modal.open(CoverageMapVisualizerModalComponent, {scrollable: true, size: 'xl'})
+        const jobFolder = this.electronService.path.join(this.settings.resultStoragePath, this.clickedJob.job.id)
+        const uniprotData = this.electronService.dataForgeFS.readFileSync(this.electronService.path.join(jobFolder, 'uniprot_data.txt')).parseCSV()
+        const coverageData = this.electronService.dataForgeFS.readFileSync(this.electronService.path.join(jobFolder, 'coverage.txt')).parseCSV()
+        ref.componentInstance.uniprotData = uniprotData
+        ref.componentInstance.coverageData = coverageData
+      }
+    }
+  }
+
   protected readonly Object = Object;
 }
