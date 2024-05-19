@@ -43,7 +43,7 @@ let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 main.initialize()
-
+let linkData: string | null = null
 const osMac = process.platform === 'darwin';
 
 const menuTemplate = [
@@ -303,17 +303,30 @@ function createWindow(): BrowserWindow {
     // when you should delete the corresponding element.
     win = null;
   });
+  if (process.platform !== 'darwin') {
+    const url = process.argv.find(arg => arg.startsWith('cauldron:'));
+    if (url) {
+      linkData = url;
 
+    }
+  }
   return win;
 }
 
 try {
-  app.commandLine.appendSwitch('ignore-gpu-blacklist')
+
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
   app.on('ready', () => setTimeout(createWindow, 400));
+  app.setAsDefaultProtocolClient('cauldron')
+  app.commandLine.appendSwitch('ignore-gpu-blacklist')
+  app.on('open-url', (event, url) => {
+    event.preventDefault()
+    linkData = url
+  })
+
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -364,6 +377,11 @@ try {
     win?.destroy()
     app.quit()
   })
+
+  ipcMain.on('get-link-data', (event, arg) => {
+    win?.webContents.send('link-data', linkData)
+  })
+
 } catch (e) {
   // Catch Error
   // throw e;

@@ -35,7 +35,7 @@ import {CoverageMapModalComponent} from "./modals/coverage-map-modal/coverage-ma
 })
 export class AppComponent {
   active: string = "home";
-
+  linkData: {step: number, folder: number, baseURL: string, token: string, name: string, session: string} = {step: 0, folder: 0, baseURL: '', token: '', name: "", session: ""}
   constructor(
     private electronService: ElectronService,
     private translate: TranslateService,
@@ -52,6 +52,9 @@ export class AppComponent {
       console.log('Run in electron');
       console.log('Electron ipcRenderer', this.electronService.ipcRenderer);
       console.log('NodeJS childProcess', this.electronService.childProcess);
+      this.electronService.linkDataSubject.asObservable().subscribe((data) => {
+        this.linkData = data
+      })
       this.electronService.dataTransformationChannelSubject.asObservable().subscribe((data) => {
         console.log(data)
         switch (data) {
@@ -152,6 +155,7 @@ export class AppComponent {
                     presenting_method: result.presenting_method,
                     cor_shape: result.cor_shape,
                     plot_only: result.plot_only,
+                    colorRamp: result.colorRamp,
                     type: 'correlation-matrix'
                   }})
               })

@@ -21,5 +21,11 @@
     <router-outlet></router-outlet>
   </div>
 </div>
-
+@if (linkData.token !== "" && linkData.token !== null && linkData.token !== undefined) {
+  <div style="position: fixed; z-index: 1030; bottom: 50px; right: 50px">
+    <div class="alert alert-warning">
+      Connected to @if (linkData.step>0) { step {{linkData.name}} } @else if (linkData.folder>0)  { folder {{linkData.name}} }
+    </div>
+  </div>
+}
 <app-toast-container></app-toast-container>

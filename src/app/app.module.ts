@@ -18,6 +18,8 @@ import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import {NavbarComponent} from "./navigation/navbar/navbar.component";
 import {ToastContainerComponent} from "./toast-container/toast-container.component";
+import {NgxColorsModule} from "ngx-colors";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -26,6 +28,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
   declarations: [AppComponent],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
     CoreModule,
@@ -42,7 +45,8 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     }),
     NgbModule,
     NavbarComponent,
-    ToastContainerComponent
+    ToastContainerComponent,
+    NgxColorsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

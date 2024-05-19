@@ -333,7 +333,7 @@ export class JobQueueService {
           break
         case "correlation-matrix":
           const options_cm = Object.assign({}, this.electronService.pythonOptions)
-          const payload_cm = data as {file_path: string, sample_cols: string[], index_col: string, method: string, min_value?: number, order?: string, hclust_method: string, presenting_method: string, cor_shape: string, plot_only: string, type: string}
+          const payload_cm = data as {file_path: string, sample_cols: string[], index_col: string, method: string, min_value?: number, order?: string, hclust_method: string, presenting_method: string, cor_shape: string, plot_only: string, type: string, colorRamp: string}
           options_cm.args = [
             "--file_path", payload_cm.file_path,
             "--sample_cols", payload_cm.sample_cols.join(","),
@@ -343,6 +343,7 @@ export class JobQueueService {
             "--presenting_method", payload_cm.presenting_method,
             "--cor_shape", payload_cm.cor_shape,
             "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--color_ramp_palette", payload_cm.colorRamp,
             "--r_home", this.electronService.RPath.replace(this.electronService.path.sep+ ["bin", "R.exe"].join(this.electronService.path.sep), "")
           ]
 

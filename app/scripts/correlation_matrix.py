@@ -17,7 +17,8 @@ def r_correlation_matrix(
         hclust_method: str = "ward.D",
         presenting_method: str = "ellipse",
         cor_shape: str = "upper",
-        plot_only: bool = False
+        plot_only: bool = False,
+        color_ramp_palette: str = "#053061,#2166AC,#4393C3,#92C5DE,#D1E5F0,#FFFFFF,#FDDBC7,#F4A582,#D6604D,#B2182B,#67001F"
 ):
 
     import rpy2.robjects as ro
@@ -41,14 +42,16 @@ def r_correlation_matrix(
         r_from_pd_df = ro.conversion.get_conversion().py2rpy(df)
         corrplot = importr("corrplot")
 
+
     ro.globalenv["data"] = r_from_pd_df
     ro.globalenv["selectedColumns"] = ro.StrVector(
         column_replacement.values())
-
+    ro.globalenv["col"] = ro.StrVector(color_ramp_palette.split(","))
     ro.r(f"""
     data <- data[selectedColumns]
     rownames(data) <- data${r_index_col}
     data${r_index_col} <- NULL
+    col <- colorRampPalette(col)(200)
     """)
     if not plot_only:
         ro.r(f"""
@@ -74,30 +77,31 @@ def r_correlation_matrix(
     output_file = os.path.join(output_folder, "correlation_matrix.txt").replace("\\", "/")
     output_plot = os.path.join(output_folder, "correlation_matrix.pdf").replace("\\", "/")
 
+
     if method:
         if order == "hclust":
             ro.r(f"""
             pdf("{output_plot}")
-            cor.data <- corrplot(as.matrix(data), order="{order}", hclust.method="{hclust_method}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value))
+            cor.data <- corrplot(as.matrix(data), order="{order}", hclust.method="{hclust_method}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value), col=col)
             dev.off()
             """)
         else:
             ro.r(f"""
             pdf("{output_plot}")
-            cor.data <- corrplot(as.matrix(data), order="{order}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value))
+            cor.data <- corrplot(as.matrix(data), order="{order}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value),  col=col)
             dev.off()
             """)
     else:
         if order == "hclust":
             ro.r(f"""
             pdf("{output_plot}")
-            cor.data <- corrplot(as.matrix(data), order="{order}", hclust.method="{hclust_method}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value))
+            cor.data <- corrplot(as.matrix(data), order="{order}", hclust.method="{hclust_method}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value),  col=col)
             dev.off()
             """)
         else:
             ro.r(f"""
             pdf("{output_plot}")
-            cor.data <- corrplot(as.matrix(data), order="{order}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value))
+            cor.data <- corrplot(as.matrix(data), order="{order}", method="{presenting_method}", type="{cor_shape}", is.corr=FALSE, col.lim = c(min.value,max.value),  col=col)
             dev.off()
             """)
     result = ro.r("cor.data$corrPos")
@@ -124,10 +128,11 @@ def setup_r_home(r_home: str):
 @click.option("--cor_shape", "-cs", help="Shape of the correlation matrix", type=str, default="upper")
 @click.option("--r_home", "-rh", help="Path to the R home directory", type=str)
 @click.option("--plot_only", "-po", help="Only plot the correlation matrix", is_flag=True)
-def main(file_path: str, output_folder: str, index_col: str, sample_cols: str, method: str, min_value: float, order: str, hclust_method: str, presenting_method: str, cor_shape: str, r_home: str, plot_only: bool):
+@click.option("--color_ramp_palette", "-crp", help="Color ramp palette for the correlation matrix", type=str, default="#053061,#2166AC,#4393C3,#92C5DE,#D1E5F0,#FFFFFF,#FDDBC7,#F4A582,#D6604D,#B2182B,#67001F")
+def main(file_path: str, output_folder: str, index_col: str, sample_cols: str, method: str, min_value: float, order: str, hclust_method: str, presenting_method: str, cor_shape: str, r_home: str, plot_only: bool, color_ramp_palette: str):
     setup_r_home(r_home)
     sample_cols = sample_cols.split(",")
-    r_correlation_matrix(file_path, output_folder, index_col, sample_cols, method, min_value, order, hclust_method, presenting_method, cor_shape, plot_only)
+    r_correlation_matrix(file_path, output_folder, index_col, sample_cols, method, min_value, order, hclust_method, presenting_method, cor_shape, plot_only, color_ramp_palette)
 
 if __name__ == "__main__":
     main()

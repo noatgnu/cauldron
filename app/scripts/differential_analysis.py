@@ -23,13 +23,15 @@ def diff_analysis(input_file: str, output_folder: str, annotation_file: str, com
         if r["Condition"] not in coral.conditions:
             coral.add_condition(r["Condition"])
         coral.add_condition_map(r["Condition"], [r["Sample"]])
+
     for i, r in comparison_df.iterrows():
         coral.add_comparison(r["condition_A"], r["condition_B"], r["comparison_label"])
     coral.index_columns = index
     coral.filter_missing_columns(col_filter)
     coral.prepare()
     coral.filter_missing_rows(row_filter)
-    if impute != "knn":
+    #if impute != "knn":
+    if impute != "":
         coral.impute(impute)
         coral.export_df_from_R(os.path.join(output_folder, "imputed.txt").replace("\\", "/"))
     if log2:
@@ -40,9 +42,9 @@ def diff_analysis(input_file: str, output_folder: str, annotation_file: str, com
     if normalize:
         coral.normalize(normalize)
         coral.export_df_from_R(os.path.join(output_folder, "normalized.txt").replace("\\", "/"))
-    if impute == "knn":
-        coral.impute(impute)
-        coral.export_df_from_R(os.path.join(output_folder, "imputed.txt").replace("\\", "/"))
+    #if impute == "knn":
+    #    coral.impute(impute)
+    #    coral.export_df_from_R(os.path.join(output_folder, "imputed.txt").replace("\\", "/"))
     coral.prepare_for_limma()
     result = []
     for d in coral.run_limma():

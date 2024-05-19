@@ -9,7 +9,7 @@ import * as remote from '@electron/remote';
 import {glob} from "glob";
 import {TxtReader} from "txt-reader";
 import * as path from "path";
-import {Subject} from "rxjs";
+import {BehaviorSubject, Subject} from "rxjs";
 import * as EmbeddedQueue from "embedded-queue"
 import {Settings} from "../../../settings/settings";
 import * as dataForgeFS from "data-forge-fs";
@@ -66,6 +66,9 @@ export class ElectronService {
   resourcePath: string = ""
   translatedPlatform: string = ""
   utilitySubject: Subject<string> = new Subject<string>()
+
+  linkDataSubject: BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}> = new BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}>({step: 0, folder: 0, token: "", baseURL: "", name: "", session: ""})
+
   constructor() {
     // Conditional imports
     if (this.isElectron) {
@@ -140,6 +143,17 @@ export class ElectronService {
       })
 
 
+      this.ipcRenderer.on('link-data', (event, message) => {
+        const data = message.replace("cauldron:", "")
+        console.log(message)
+        try {
+          this.linkDataSubject.next(JSON.parse(atob(data)))
+        } catch (e) {
+          console.log(e)
+        }
+      })
+
+      this.ipcRenderer.send('get-link-data', 'link')
       this.ipcRenderer.send('get-process-resource-path', 'python')
       this.ipcRenderer.on('python-path', (event, message) => {
         this.pythonPath = message

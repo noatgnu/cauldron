@@ -1,3 +1,4 @@
+import json
 import warnings
 import click
 import pandas as pd
@@ -35,7 +36,7 @@ def fuzz_cluster(file_path: str, annotation_path: str, output_folder: str, cente
     for center in center_count:
         pca = PCA(n_components=2)
         points = pca.fit_transform(df_t)
-
+        explanation = pca.explained_variance_ratio_
         initial_centers = kmeans_plusplus_initializer(points, center,
                                                       kmeans_plusplus_initializer.FARTHEST_CENTER_CANDIDATE).initialize()
         fcm_instance = fcm(points, initial_centers)
@@ -51,6 +52,8 @@ def fuzz_cluster(file_path: str, annotation_path: str, output_folder: str, cente
             index=False,
             sep="\t"
         )
+        with open(os.path.join(output_folder, "explained_variance_ratio.json"), "w") as f:
+            f.write(json.dumps(explanation.tolist()))
 
 
 @click.command()

@@ -1,15 +1,18 @@
 import { Component } from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ImportedFileSelectionComponent} from "../../imported-file-selection/imported-file-selection.component";
 import {ElectronService} from "../../core/services";
+import {NgxColorsModule} from "ngx-colors";
 
 @Component({
   selector: 'app-correlation-matrix-modal',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    ImportedFileSelectionComponent
+    ImportedFileSelectionComponent,
+    NgxColorsModule,
+    FormsModule
   ],
   templateUrl: './correlation-matrix-modal.component.html',
   styleUrl: './correlation-matrix-modal.component.scss'
@@ -21,7 +24,7 @@ export class CorrelationMatrixModalComponent {
   orderList: string[] = ["original", "AOE", "FPC", "hclust", "alphabet"]
   hclusteringMethod: string[] = ["complete", "ward", "ward.D", "ward.D2", "single", "average",
     "mcquitty", "median", "centroid"]
-
+  colorRamp: string[] = "#053061,#2166AC,#4393C3,#92C5DE,#D1E5F0,#FFFFFF,#FDDBC7,#F4A582,#D6604D,#B2182B,#67001F".split(",")
   form: FormGroup = this.fb.group({
     file_path: new FormControl(null),
     sample_cols: new FormControl([], Validators.required),
@@ -33,6 +36,7 @@ export class CorrelationMatrixModalComponent {
     presenting_method: new FormControl("ellipse"),
     cor_shape: new FormControl("upper"),
     plot_only: new FormControl(false),
+    colorRamp: new FormControl(this.colorRamp.join(','), Validators.required),
   })
   columns: string[] = []
   constructor(private fb: FormBuilder, private activeModal: NgbActiveModal, private electronService: ElectronService) {
@@ -43,6 +47,7 @@ export class CorrelationMatrixModalComponent {
   }
 
   submit() {
+    this.form.controls.colorRamp.setValue(this.colorRamp.join(','))
     if (this.form.valid) {
       this.activeModal.close(this.form.value)
     }
@@ -98,5 +103,13 @@ export class CorrelationMatrixModalComponent {
     )
     this.form.controls["index_col"].setValue("Precursor.Id")
     this.form.controls["order"].setValue("hclust")
+  }
+
+  addColor() {
+    this.colorRamp.push("#FFFFFF")
+  }
+
+  removeColor(index: number) {
+    this.colorRamp.splice(index, 1)
   }
 }
