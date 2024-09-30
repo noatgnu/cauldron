@@ -43,7 +43,10 @@ jobs:
       run: dir app\bin\win\python
 
     - name: Install Python packages
-      run: cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
+      env:
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+      run: |
+        cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
