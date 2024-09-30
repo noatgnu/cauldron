@@ -41,7 +41,20 @@ jobs:
 
     - name: List directory contents for debugging
       run: dir app\bin\win\python
-
+      
+    - name: Validate R_HOME environment variable
+      env:
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+      shell: pwsh
+      run: |
+        if (-Not $env:R_HOME) {
+          Write-Error "R_HOME is not set"
+          exit 1
+        } else {
+          Write-Output "R_HOME is set to $env:R_HOME"
+          dir $env:R_HOME
+        }
+        
     - name: Install Python packages
       env:
         R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
