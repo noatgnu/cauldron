@@ -18,7 +18,6 @@ import {Options, PythonShell} from "python-shell";
 import * as child_process from "child_process";
 import {Job} from "embedded-queue";
 
-import {JobConstructorData} from "embedded-queue/dist/job";
 @Injectable({
   providedIn: 'root'
 })
@@ -69,6 +68,7 @@ export class ElectronService {
 
   linkDataSubject: BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}> = new BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}>({step: 0, folder: 0, token: "", baseURL: "", name: "", session: ""})
 
+
   constructor() {
     // Conditional imports
     if (this.isElectron) {
@@ -99,10 +99,10 @@ export class ElectronService {
         console.log(`stdout:\n${stdout}`);
       });
       this.ipcRenderer.on('uniprot', (event, message) => {
-        this.uniprotChannelSubject.next(message)
+        this.uniprotChannelSubject.next(message as string)
       });
       this.ipcRenderer.on('diann', (event, message) => {
-        this.diannCVChannelSubject.next(message)
+        this.diannCVChannelSubject.next(message as string)
       })
       this.ipcRenderer.on('process-resource-path', (event, message) => {
         this.resourcePath = message
@@ -110,44 +110,44 @@ export class ElectronService {
         this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
         this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
       })
-      this.ipcRenderer.on('close', (event, message) => {
+      this.ipcRenderer.on('close', () => {
         this.closeSubject.next(true)
       })
       this.ipcRenderer.on('data-transformation', (event, message) => {
         console.log(message)
-        this.dataTransformationChannelSubject.next(message)
+        this.dataTransformationChannelSubject.next(message as string)
       })
       this.ipcRenderer.on('citation-utility', (event, message) => {
-        this.citationUtilityChannelSubject.next(message)
+        this.citationUtilityChannelSubject.next(message as string)
       })
       this.ipcRenderer.on('dimensionality-reduction', (event, message) => {
-        this.dimensionReductionChannelSubject.next(message)
+        this.dimensionReductionChannelSubject.next(message as string)
       })
       this.ipcRenderer.on('curtain', (event, message) => {
-        this.curtainChannelSubject.next(message)
+        this.curtainChannelSubject.next(message as string)
       })
       this.ipcRenderer.on('differential-analysis', (event, message) => {
-        this.differentialAnalysisSubject.next(message)
+        this.differentialAnalysisSubject.next(message as string)
       })
       this.ipcRenderer.on('file', (event, message) => {
-        this.fileSubject.next(message)
+        this.fileSubject.next(message as string)
       })
       this.ipcRenderer.on('statistical-tests', (event, message) => {
-        this.statsTestSubject.next(message)
+        this.statsTestSubject.next(message as string)
       })
       this.ipcRenderer.on('utilities', (event, message) => {
-        this.utilitySubject.next(message)
+        this.utilitySubject.next(message as string)
       })
       this.ipcRenderer.on('shutdown', (event, message) => {
-        this.shutdownSubject.next(message)
+        this.shutdownSubject.next(message as string)
       })
 
 
       this.ipcRenderer.on('link-data', (event, message) => {
-        const data = message.replace("cauldron:", "")
+        const data: string = message.replace("cauldron:", "")
         console.log(message)
         try {
-          this.linkDataSubject.next(JSON.parse(atob(data)))
+          this.linkDataSubject.next(JSON.parse(atob(data)) as { step: number, folder: number, token: string, baseURL: string, name: string, session: string })
         } catch (e) {
           console.log(e)
         }
@@ -175,8 +175,6 @@ export class ElectronService {
       this.userDataPath = this.remote.app.getPath('userData');
       this.loadConfigSettings()
 
-
-
       // Notes :
       // * A NodeJS's dependency imported with 'window.require' MUST BE present in `dependencies` of both `app/package.json`
       // and `package.json (root folder)` in order to make it work here in Electron's Renderer process (src folder)
@@ -190,6 +188,11 @@ export class ElectronService {
       // https://www.electronjs.org/docs/latest/api/ipc-renderer#ipcrendererinvokechannel-args
     }
   }
+
+  get isElectron(): boolean {
+    return !!(window && window.process && window.process.type);
+  }
+
   translatePlatform(platform: string) {
     switch (platform) {
       case 'darwin':
@@ -202,9 +205,6 @@ export class ElectronService {
         return platform;
     }
   }
-  get isElectron(): boolean {
-    return !!(window && window.process && window.process.type);
-  }
 
   openDialog() {
     return this.dialog.showOpenDialog({properties: ['openFile', 'multiSelections']})
@@ -214,15 +214,18 @@ export class ElectronService {
     return this.dialog.showOpenDialog({properties: ['openDirectory']})
   }
 
-  async sniffFile(file: FileSystemEntry|File) {
+  async sniffFile(file: FileSystemEntry | File): Promise<{result: (string|Uint8Array)[]}> {
     const reader = new this.txtReader();
+
     if (file instanceof File) {
-      return reader.sniffLines(file, 10)
+      return reader.sniffLines(file, 10);
     }
-    // @ts-ignore
-    const fileObject = await new Promise((resolve, reject) => file.file(resolve, reject))
-    // @ts-ignore
-    return reader.sniffLines(fileObject, 10)
+
+    const fileObject = await new Promise<File>((resolve, reject) => {
+      (file as FileSystemFileEntry).file(resolve, reject);
+    });
+
+    return reader.sniffLines(fileObject, 10);
   }
 
   loadConfigSettings(configPath: string = "") {
@@ -247,25 +250,29 @@ export class ElectronService {
     this.fs.writeFileSync(this.configPath, this.settings.toJSON())
   }
 
-  *readTextFileLineByLine(filePath: string) {
+  *readTextFileLineByLine(filePath: string): Generator<string, void, unknown> {
     const fd = this.fs.openSync(filePath, 'r');
     const bfSize = 64 * 1024;
-    const buf = new Buffer(bfSize);
+    const buf = Buffer.alloc(bfSize);
     let leftOver = '';
-    let lineNum = 0;
     let lines: string[] = [];
-    let n;
-    while ((n = this.fs.readSync(fd, buf, 0, bfSize, null)) !== 0) {
-      lines = buf.toString('utf8', 0, n).split(/\r?\n/);
-      lines[0] = leftOver + lines[0];
-      // @ts-ignore
-      leftOver = lines.pop();
-      for (let i = 0; i < lines.length; ++i) {
-        lineNum++;
-        yield lines[i];
+    let n: number;
+
+    try {
+      while ((n = this.fs.readSync(fd, buf, 0, bfSize, null)) !== 0) {
+        lines = buf.toString('utf8', 0, n).split(/\r?\n/);
+        lines[0] = leftOver + lines[0];
+        leftOver = lines.pop() || '';
+        for (const line of lines) {
+          yield line;
+        }
       }
+      if (leftOver) {
+        yield leftOver;
+      }
+    } finally {
+      this.fs.closeSync(fd);
     }
-    this.fs.closeSync(fd)
   }
 
   saveJobQueue(jobMap: {[key: string]: {completed: boolean, job: Job, error: boolean, type: string, name?: string}}) {
@@ -290,36 +297,40 @@ export class ElectronService {
     this.fs.writeFileSync(jobQueuePath, JSON.stringify(payload))
   }
 
-  loadJobQueue() {
-    const jobQueuePath = this.path.join(this.userDataPath, "jobQueue.json")
+  loadJobQueue(): { [key: string]: { completed: boolean; job: any; error: boolean; type: string; name?: string } } {
+    const jobQueuePath = this.path.join(this.userDataPath, "jobQueue.json");
     if (this.fs.existsSync(jobQueuePath)) {
-      const data = this.fs.readFileSync(jobQueuePath, 'utf8')
-      return JSON.parse(data)
+      const data = this.fs.readFileSync(jobQueuePath, 'utf8');
+      return JSON.parse(data) as { [key: string]: { completed: boolean; job: any; error: boolean; type: string; name?: string } };
     } else {
-      return {}
+      return {};
     }
   }
 
-  getFirstLine(filePath: string) {
+  getFirstLine(filePath: string): string | null {
     const fd = this.fs.openSync(filePath, 'r');
     const bfSize = 64 * 1024;
-    const buf = new Buffer(bfSize);
+    const buf = Buffer.alloc(bfSize);
     let leftOver = '';
-    let lineNum = 0;
     let lines: string[] = [];
-    let n;
-    while ((n = this.fs.readSync(fd, buf, 0, bfSize, null)) !== 0) {
-      lines = buf.toString('utf8', 0, n).split(/\r?\n/);
-      lines[0] = leftOver + lines[0];
-      // @ts-ignore
-      leftOver = lines.pop();
-      for (let i = 0; i < lines.length; ++i) {
-        lineNum++;
-        this.fs.closeSync(fd)
-        return lines[i];
+    let n: number;
+
+    try {
+      while ((n = this.fs.readSync(fd, buf, 0, bfSize, null)) !== 0) {
+        lines = buf.toString('utf8', 0, n).split(/\r?\n/);
+        lines[0] = leftOver + lines[0];
+        leftOver = lines.pop() || '';
+        if (lines.length > 0) {
+          return lines[0];
+        }
       }
+    } catch (error: any) {
+      console.error(`Error reading file: ${error.message}`);
+      return null;
+    } finally {
+      this.fs.closeSync(fd);
     }
 
+    return null;
   }
-
 }

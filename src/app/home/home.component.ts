@@ -1,12 +1,11 @@
 import {AfterViewInit, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
-import {ElectronService} from "../core/services";
-import {ToastService} from "../toast-container/toast.service";
 import {DataFrame, fromCSV} from "data-forge";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ElectronService} from "../core/services";
+import {ToastService} from "../toast-container/toast.service";
+import {JobQueueService} from "../job-queue/job-queue.service";
 import {UniprotModalComponent} from "../modals/uniprot-modal/uniprot-modal.component";
-import * as worker_threads from "worker_threads";
-import { JobQueueService } from '../job-queue/job-queue.service';
 import {DiannCvModalComponent} from "../modals/diann-cv-modal/diann-cv-modal.component";
 
 @Component({
@@ -15,6 +14,7 @@ import {DiannCvModalComponent} from "../modals/diann-cv-modal/diann-cv-modal.com
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, AfterViewInit {
+
   @ViewChild("fileZone") fileZone: ElementRef | undefined;
 
   clickedFile: any = null;
@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   set previewTab(value: number) {
     this._previewTab = value
     if (this._previewTab === 1) {
-
+      console.log(this.tableArray)
     }
   }
 
@@ -49,17 +49,21 @@ export class HomeComponent implements OnInit, AfterViewInit {
           ref.componentInstance.fieldParameters = 'accession,id,gene_names,protein_name,organism_name,go_id,sequence'
           ref.result.then(async (result) => {
             await jobQueue.queue.createJob({type: 'uniprot-add', data: {data: this.table, columns: result.selectedUniProtColumns, from: result.from, to: result.to, file: this.clickedFile.path, uniprotColumn: result.column, type: 'Add UniProt Data to File'}})
+          }).catch((err) => {
+            console.log(err)
           })
         })
       }
     })
 
-    this.electronService.diannCVChannelSubject.asObservable().subscribe((data) => {
+    this.electronService.diannCVChannelSubject.asObservable().subscribe(() => {
       this.zone.run(() => {
         const ref = this.modal.open(DiannCvModalComponent, {scrollable: true})
         ref.result.then(async (result) => {
           result['type'] = 'Generate Diann CV Plot from PR and/or PG Matrix files'
           await jobQueue.queue.createJob({type: "diann-cv", data: result})
+        }).catch((err) => {
+          console.log(err)
         })
       })
     })
@@ -71,66 +75,84 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     if (this.fileZone) {
-      this.fileZone.nativeElement.addEventListener("drop", (e:DragEvent) => {
+      const fileZoneElement = this.fileZone.nativeElement;
+
+      fileZoneElement.addEventListener("drop", (e: DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        //for (const f of e.dataTransfer?.files) {
-        //  this.files.push(f.path)
-        //}
-        //check if transferring folder
 
-        if (e.dataTransfer?.items) {
-          // @ts-ignore
-          for (const item of e.dataTransfer?.items) {
+        const items = e.dataTransfer?.items;
+        if (items) {
+          for (const item of Array.from(items)) {
             if (item.kind === 'file') {
-
               const file = item.webkitGetAsEntry();
               if (file) {
-                this.recursiveReadDir(file, file.fullPath)
+                this.recursiveReadDir(file, file.fullPath);
               }
             }
           }
         }
-      })
-      this.fileZone.nativeElement.addEventListener("dragover", (e:DragEvent) => {
+      });
+
+      fileZoneElement.addEventListener("dragover", (e: DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-      })
-      this.fileZone.nativeElement.addEventListener("dragenter", (e:DragEvent) => {
+      });
+
+      fileZoneElement.addEventListener("dragenter", (e: DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-      })
+      });
     }
   }
 
-  openDialog() {
-    this.electronService.openDialog().then((files: any) => {
-      for (const filePath of files.filePaths) {
-        const buffer = this.electronService.fs.readFileSync(filePath)
-        const arrayData = buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
-        const fileName = this.electronService.path.basename(filePath)
-        const file = new File([arrayData], fileName)
-        if (file.name.endsWith(".tsv") || file.name.endsWith(".csv") || file.name.endsWith(".txt")) {
-          this.electronService.files.push({checked: false, file: file, path: filePath, name: fileName, isTabular: true, isFasta: false})
-        } else if (file.name.endsWith(".fa") || file.name.endsWith(".fasta")) {
-          this.electronService.files.push({checked: false, file: file, path: filePath, name: fileName, isTabular: false, isFasta: true})
+  openDialog(): void {
+    this.electronService.openDialog().then((files: { filePaths: string[] }) => {
+      files.filePaths.forEach(filePath => {
+        try {
+          const buffer = this.electronService.fs.readFileSync(filePath);
+          const arrayData = buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+          const fileName = this.electronService.path.basename(filePath);
+          const file = new File([arrayData], fileName);
+
+          const fileType = file.name.split('.').pop()?.toLowerCase();
+          if (fileType) {
+            const isTabular = ['tsv', 'csv', 'txt'].includes(fileType);
+            const isFasta = ['fa', 'fasta'].includes(fileType);
+
+            if (isTabular || isFasta) {
+              this.electronService.files.push({
+                checked: false,
+                file: file,
+                path: filePath,
+                name: fileName,
+                isTabular: isTabular,
+                isFasta: isFasta
+              });
+            }
+          }
+        } catch (error: any) {
+          console.error(`Error reading file ${filePath}: ${error.message}`);
         }
-      }
-    })
+      });
+    }).catch(error => {
+      console.error(`Error opening dialog: ${error.message}`);
+    });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   recursiveReadDir(file: any, path: string) {
     if (file.isDirectory) {
       const reader = file.createReader();
       reader.readEntries((entries: any) => {
         for (const entry of entries) {
-          this.recursiveReadDir(entry, entry.fullPath)
+          this.recursiveReadDir(entry, entry.fullPath as string)
         }
       })
     } else if (file.isFile) {
-      this.getFileObject(file).then((f: any) => {
+      this.getFileObject(file as FileSystemFileEntry).then((f: any) => {
         if (file.name.endsWith(".tsv") || file.name.endsWith(".csv") || file.name.endsWith(".txt")) {
           this.zone.run(() => {
             console.log(f)
@@ -143,6 +165,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
             this.electronService.files.push({checked: false, file: f, path: f.path, name: file.name, isTabular: false, isFasta: true})
           })
         }
+      }).catch((err) => {
+        console.log(err)
       })
 
     }
@@ -157,11 +181,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
     } else {
       this.clickedFile = f
       if (f.isTabular) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         this.electronService.sniffFile(f.file).then((data: any) => {
           this.sniffContent = data.result
           this.table = fromCSV(this.sniffContent.join("\n"))
           this.columns = this.table.getColumnNames()
           this.tableArray = this.table.toArray()
+        }).catch((err) => {
+          console.log(err)
         })
       }
     }
@@ -179,7 +206,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   async getFileObject(file: FileSystemEntry) {
-    // @ts-ignore
-    return await new Promise((resolve, reject) => file.file(resolve, reject))
+
+    return await new Promise<File>((resolve, reject) => {
+      (file as FileSystemFileEntry).file(resolve, reject);
+    });
   }
 }

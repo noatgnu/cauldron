@@ -51,6 +51,7 @@ export class JobQueueComponent {
     } else {
       this.displayJob = Object.values(this.jobMap).reverse()
     }
+    console.log(this.displayJob)
   }
   get queueName() {
     return this._queueName
@@ -72,12 +73,13 @@ export class JobQueueComponent {
     this.form.controls['jobSearch'].valueChanges.subscribe((value: string) => {
       this.jobSearch(value)
     })
-    this.jobQueue.jobQueueUpdateSubject.asObservable().subscribe((value: boolean) => {
+    this.jobQueue.jobQueueUpdateSubject.asObservable().subscribe(() => {
       if (this.queueName === "previous") {
         this.displayJob = Object.values(this.previousJobMap).reverse()
       } else {
         this.displayJob = Object.values(this.jobMap).reverse()
       }
+      console.log(this.displayJob)
 
     })
   }
@@ -99,7 +101,10 @@ export class JobQueueComponent {
 
   getJobStatus(job: Job) {
     if (this.queueName === "current") {
-      return this.jobMap[job.id].completed
+      if (this.jobMap[job.id]) {
+        return this.jobMap[job.id].completed
+      }
+      return false
     } else {
       return this.previousJobMap[job.id].completed
     }

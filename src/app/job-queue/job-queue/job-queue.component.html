@@ -19,7 +19,7 @@
       <div class="list-group d-flex flex-column rounded-0 overflow-auto">
         @for (j of displayJob; track j) {
           <div (click)="handleJobClick(j)" [ngClass]="{'list-group-item': true, 'd-flex': true}">
-            @if (clickedJob==j) {
+            @if (clickedJob===j) {
               <div style="width: 10px" class="bg-warning"></div>
             }
             <div [ngClass]="{'p-2': true, 'rounded-1': true, 'bg-danger': j.error, 'bg-success': j.completed, 'text-light': j.completed||j.error}">

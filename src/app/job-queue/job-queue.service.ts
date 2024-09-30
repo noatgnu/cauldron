@@ -534,11 +534,53 @@ export class JobQueueService {
           console.log(options_qf.args)
           await job.setProgress(50, 100)
 
-          const result_qf =  await this.electronService.pythonShell.run([
+          await this.electronService.pythonShell.run([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "differential_analysis.py"
           ].join(this.electronService.path.sep), options_qf)
+          break
+        case "alphastats":
+          const options_alpha = Object.assign({}, this.electronService.pythonOptions)
+          const payload_alpha = data as {log2: boolean, input_file: string, annotation_file: string, index_col: string, evidence_file: string, data_completeness: number, imputation: string, normalization: string, method: string, merge_columns_list: string[], engine: string, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[]}
+          this.electronService.fs.mkdirSync([this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep), {recursive: true})
+          // write comparison_file
+          const comparisonFile_alpha = new DataFrame(payload_alpha.comparisons)
+          // @ts-ignore
+          this.electronService.fs.writeFileSync([this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep), comparisonFile_alpha.toCSV({delimiter: "\t"}))
+          options_alpha.args = [
+            "--file_path", payload_alpha.input_file,
+            "--metadata_path", payload_alpha.annotation_file,
+            "--index", payload_alpha.index_col,
+            "--comparison_matrix", [this.electronService.settings.resultStoragePath, job.id, "comparison.txt"].join(this.electronService.path.sep),
+            "--output_folder", [this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep),
+            "--data_completeness", payload_alpha.data_completeness.toString(),
+            "--impute", payload_alpha.imputation,
+            "--normalize", payload_alpha.normalization,
+            "--method", payload_alpha.method,
+            "--engine", payload_alpha.engine,
+          ]
+
+          if (payload_alpha.evidence_file) {
+            options_alpha.args.push("--evidence_file")
+            options_alpha.args.push(payload_alpha.evidence_file)
+          }
+
+          if (payload_alpha.merge_columns_list) {
+            options_alpha.args.push("--merge_columns")
+            options_alpha.args.push(payload_alpha.merge_columns_list.join(","))
+          }
+
+          if (payload_alpha.log2) {
+            options_alpha.args.push("--log2")
+          }
+          console.log(options_alpha.args)
+          await this.electronService.pythonShell.run([
+            this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
+            "scripts",
+            "alphapept_process.py"
+          ].join(this.electronService.path.sep), options_alpha)
+          break
       }
     }, 1)
   }
@@ -598,7 +640,7 @@ export class JobQueueService {
           console.log(options.args)
 
           await job.setProgress(50, 100)
-          const result =  await this.electronService.pythonShell.run([
+          await this.electronService.pythonShell.run([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "library_check_peptide.py"
@@ -621,7 +663,7 @@ export class JobQueueService {
           }
           console.log(options_rem.args)
           await job.setProgress(50, 100)
-          const result_rem =  await this.electronService.pythonShell.run([
+          await this.electronService.pythonShell.run([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "remap_ptm.py"
@@ -647,7 +689,7 @@ export class JobQueueService {
 
           console.log(options_cm.args)
           await job.setProgress(50, 100)
-          const result_cm =  await this.electronService.pythonShell.run([
+          await this.electronService.pythonShell.run([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "get_coverage.py"

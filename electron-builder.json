@@ -1,5 +1,5 @@
 {
-  "appId": "info.proteo.${name}",
+  "appId": "info.proteo.cauldron",
   "asar": true,
   "directories": {
     "output": "release/"
@@ -14,7 +14,6 @@
       "from": "../dist",
       "filter": ["**/*"]
     }
-
   ],
   "extraResources": [
     {
@@ -51,10 +50,9 @@
     }
   ],
   "win": {
-    "icon": "dist/assets/icons/favicon.ico",
+    "icon": "dist/assets/icons",
     "target": [
-      "portable",
-      "msi"
+      "nsis"
     ],
     "signAndEditExecutable": true,
     "publisherName": [
@@ -62,7 +60,10 @@
       "University of Dundee"
     ]
   },
-
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true
+  },
   "portable": {
     "splashImage": "dist/assets/icons/electron.bmp"
   },

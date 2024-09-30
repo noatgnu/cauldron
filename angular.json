@@ -4,7 +4,7 @@
     "schematicCollections": [
       "@angular-eslint/schematics"
     ],
-    "analytics": "35d4fbbe-21e2-46ba-a593-b66534b09aea"
+    "analytics": "f3598dfe-4e5e-41ed-8ce6-006f7d151ab9"
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -43,8 +43,7 @@
             "customWebpackConfig": {
               "path": "./angular.webpack.js",
               "replaceDuplicatePlugins": true
-            },
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            }
           },
           "configurations": {
             "dev": {
@@ -71,7 +70,7 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": false,
+              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -103,7 +102,7 @@
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": false,
+              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -144,12 +143,7 @@
           "options": {
             "polyfills": ["src/polyfills-test.ts"],
             "tsConfig": "src/tsconfig.spec.json",
-            "globalMocks": [
-              "styleTransform",
-              "matchMedia",
-              "getComputedStyle"
-            ],
-            "webWorkerTsConfig": "tsconfig.worker.json"
+            "globalMocks": ["styleTransform", "matchMedia", "getComputedStyle"],
           }
         },
         "lint": {

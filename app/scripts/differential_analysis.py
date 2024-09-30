@@ -27,6 +27,12 @@ def diff_analysis(input_file: str, output_folder: str, annotation_file: str, com
     for i, r in comparison_df.iterrows():
         coral.add_comparison(r["condition_A"], r["condition_B"], r["comparison_label"])
     coral.index_columns = index
+    #count missing for each column in unprocessed_df
+    print(coral.unprocessed_df.isnull().sum())
+    #count proportion of missing values for each column in unprocessed_df
+    print(coral.unprocessed_df.isnull().sum() / len(coral.unprocessed_df))
+
+
     coral.filter_missing_columns(col_filter)
     coral.prepare()
     coral.filter_missing_rows(row_filter)

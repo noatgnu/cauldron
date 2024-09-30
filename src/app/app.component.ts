@@ -1,4 +1,4 @@
-import {Component, HostListener, NgZone} from '@angular/core';
+import {Component, NgZone} from '@angular/core';
 import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
@@ -27,6 +27,9 @@ import {
 } from "./modals/check-peptide-in-library-modal/check-peptide-in-library-modal.component";
 import {RemapPtmPositionsModalComponent} from "./modals/remap-ptm-positions-modal/remap-ptm-positions-modal.component";
 import {CoverageMapModalComponent} from "./modals/coverage-map-modal/coverage-map-modal.component";
+import {
+  AlphaPeptStatsDifferentialAnalysisModalComponent
+} from "./modals/alpha-pept-stats-differential-analysis-modal/alpha-pept-stats-differential-analysis-modal.component";
 
 @Component({
   selector: 'app-root',
@@ -80,7 +83,7 @@ export class AppComponent {
               const ref = this.modal.open(NormalizationModalComponent, {scrollable: true})
               ref.result.then(async (result) => {
                 await this.jobQueueService.queue.createJob({type: 'data-transformation', data:{
-                  file_path: result.file_path,
+                    file_path: result.file_path,
                     columns_name: result.columns_name,
                     scaler_type: result.scaler_type,
                     with_centering: result.with_centering,
@@ -229,7 +232,7 @@ export class AppComponent {
               const ref = this.modal.open(QfeaturesLimmaModalComponent)
               ref.result.then(async (result) => {
                 await this.jobQueue.queue.createJob({type: 'differential-analysis', data: {
-                  input_file: result.input_file,
+                    input_file: result.input_file,
                     annotation_file: result.annotation_file,
                     index_col: result.index_col,
                     log2: result.log2,
@@ -245,6 +248,27 @@ export class AppComponent {
               })
             })
             break
+          case 'alphastats':
+            zone.run(() => {
+              const ref = this.modal.open(AlphaPeptStatsDifferentialAnalysisModalComponent)
+              ref.result.then(async (result) => {
+                await this.jobQueue.queue.createJob({type: 'differential-analysis', data: {
+                    input_file: result.input_file,
+                    annotation_file: result.annotation_file,
+                    index_col: result.index_col,
+                    log2: result.log2,
+                    comparisons: result.comparisons,
+                    evidence_file: result.evidence_file,
+                    data_completeness: result.data_completeness,
+                    imputation: result.imputation,
+                    normalization: result.normalization,
+                    method: result.method,
+                    merge_columns_list: result.merge_columns_list,
+                    engine: result.engine,
+                    type: 'alphastats'
+                  }})
+              })
+            })
         }
       })
       this.electronService.statsTestSubject.asObservable().subscribe((data) => {
