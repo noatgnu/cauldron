@@ -24,8 +24,6 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-
-
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
@@ -36,6 +34,10 @@ jobs:
         Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
         New-Item -ItemType Directory -Force -Path app/bin/win/python
         tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win/python
+
+                
+    - name: List directory contents for debugging
+      run: dir app\bin\win\python
 
     - name: Install Python packages
       run: cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
