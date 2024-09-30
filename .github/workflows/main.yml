@@ -31,7 +31,7 @@ jobs:
       run: dir app\bin\win\R-Portable
 
     - name: Install R packages
-      run: cmd /c app\bin\win\R-Portable\bin\Rscript.exe app/scripts/install_packages.R
+      run: Rscript app/scripts/install_packages.R
     
     - name: Download standalone Python 3.10
       run: |
