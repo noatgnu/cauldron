@@ -41,12 +41,12 @@ jobs:
 
     - name: List directory contents for debugging
       run: dir app\bin\win\python
-      
-    - name: Set R_HOME environment variable
-      run: echo "R_HOME=$(pwd)/app/bin/win/R-Portable" >> $GITHUB_ENV
-      
+
     - name: Install Python packages
-      run: cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
+      env:
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+      run: |
+        cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
