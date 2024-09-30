@@ -46,6 +46,13 @@ jobs:
       env:
         R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
       run: |
+        if [ -z "$R_HOME" ]; then
+          echo "R_HOME is not set"
+          exit 1
+        else
+          echo "R_HOME is set to $R_HOME"
+          dir $R_HOME
+        fi
         cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
     - name: Set up Node.js
