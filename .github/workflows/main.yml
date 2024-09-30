@@ -38,7 +38,8 @@ jobs:
         tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win/python
 
     - name: Install Python packages
-      run: & app\bin\win\python\python.exe -m pip install -r app/requirements.txt
+      run: |
+        app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
     - name: Download and extract R-Portable
       run: |
@@ -47,7 +48,8 @@ jobs:
         Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app\bin\win\R-Portable" -Wait
 
     - name: Install R packages
-      run: & app\bin\win\R-Portable\bin\Rscript.exe app/scripts/install_packages.R
+      run: |
+        app\bin\win\R-Portable\bin\Rscript.exe app/scripts/install_packages.R
 
     - name: Build Electron app
       run: npm run electron:build
