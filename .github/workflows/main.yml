@@ -24,8 +24,7 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build Electron app
-      run: npm run build
+
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -48,8 +47,8 @@ jobs:
     - name: Install R packages
       run: app\bin\win\R-Portable\bin\Rscript.exe app/scripts/install_packages.R
 
-    - name: Package Electron app
-      run: npm run package
+    - name: Build Electron app
+      run: npm run electron:build
 
     - name: Get repository name
       id: repo_name
