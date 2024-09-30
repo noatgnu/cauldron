@@ -34,6 +34,7 @@ jobs:
     - name: Download standalone Python 3.10
       run: |
         Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
+        New-Item -ItemType Directory -Force -Path app/bin/win/python
         tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win/python
 
     - name: Install Python packages
@@ -42,6 +43,7 @@ jobs:
     - name: Download and extract R-Portable
       run: |
         Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.2.0/R-4.2.0-win.exe -OutFile R-Portable.exe
+        New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
         Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app\bin\win\R-Portable" -Wait
 
     - name: Install R packages
