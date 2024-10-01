@@ -1,0 +1,70 @@
+name: CI Build Check
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install R
+      run: |
+        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.2.0/R-4.2.0-win.exe -OutFile R-Portable.exe
+        New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
+        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app\bin\win\R-Portable" -Wait
+
+    - name: List directory contents for debugging
+      run: dir app\bin\win\R-Portable
+
+    - name: Install R packages
+      run: Rscript app/scripts/install_packages.R
+    
+    - name: Download standalone Python 3.10
+      run: |
+        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
+        New-Item -ItemType Directory -Force -Path app/bin/win/python
+        tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win
+
+    - name: List directory contents for debugging
+      run: dir app\bin\win\python
+      
+    - name: Validate R_HOME environment variable
+      env:
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+      shell: pwsh
+      run: |
+        if (-Not $env:R_HOME) {
+          Write-Error "R_HOME is not set"
+          exit 1
+        } else {
+          Write-Output "R_HOME is set to $env:R_HOME"
+          dir $env:R_HOME
+        }
+        
+    - name: Install Python packages
+      env:
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+      run: |
+        cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build Electron app
+      run: npm run electron:build
