@@ -68,14 +68,10 @@ jobs:
     - name: Build Electron app
       run: npm run electron:build
 
-    - name: Get repository name
-      id: repo_name
-      run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
-
     - name: Compress NSIS output
       run: |
         $exclude = @("release\win-unpacked\*")
-        Get-ChildItem -Path release\* -Exclude $exclude | Compress-Archive -DestinationPath release\$env:REPO_NAME-v${{ github.run_number }}.zip
+        Get-ChildItem -Path release\* -Exclude $exclude | Compress-Archive -DestinationPath release\cauldron-win.zip
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -83,6 +79,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release\$env:REPO_NAME-v${{ github.run_number }}.zip
-        asset_name: $env:REPO_NAME-v${{ github.run_number }}.zip
+        asset_path: release\cauldron-win.zip
+        asset_name: cauldron-win-v${{ github.ref }}.zip
         asset_content_type: application/zip
