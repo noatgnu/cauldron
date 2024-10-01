@@ -73,7 +73,19 @@
           <option value="{{n}}">{{n}}</option>
         }
       </select>
-      <label for="normalization">Testing Method</label>
+      <label for="method">Testing Method</label>
+    </div>
+    <div class="form-floating">
+      <select class="form-select" formControlName="merge_columns_list" id="merge_columns_list" multiple>
+        @for (n of testMethods; track n) {
+          <option value="{{n}}">{{n}}</option>
+        }
+      </select>
+      <label for="merge_columns_list">Columns to be merged</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="batch_correction" formControlName="batch_correction">
+      <label for="batch_correction">Batch correction</label>
     </div>
   </form>
   <p><b>Contrast:</b></p>

@@ -542,7 +542,7 @@ export class JobQueueService {
           break
         case "alphastats":
           const options_alpha = Object.assign({}, this.electronService.pythonOptions)
-          const payload_alpha = data as {log2: boolean, input_file: string, annotation_file: string, index_col: string, evidence_file: string, data_completeness: number, imputation: string, normalization: string, method: string, merge_columns_list: string[], engine: string, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[]}
+          const payload_alpha = data as {log2: boolean, input_file: string, annotation_file: string, index_col: string, evidence_file: string, data_completeness: number, imputation: string, normalization: string, method: string, merge_columns_list: string[], engine: string, batch_correction: boolean, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[]}
           this.electronService.fs.mkdirSync([this.electronService.settings.resultStoragePath, job.id].join(this.electronService.path.sep), {recursive: true})
           // write comparison_file
           const comparisonFile_alpha = new DataFrame(payload_alpha.comparisons)
@@ -573,6 +573,13 @@ export class JobQueueService {
 
           if (payload_alpha.log2) {
             options_alpha.args.push("--log2")
+          }
+          if (payload_alpha.method === "limma") {
+            options_alpha.args.push("--r_home")
+            options_alpha.args.push(this.electronService.RPath.replace(this.electronService.path.sep+ ["bin", "R.exe"].join(this.electronService.path.sep), ""))
+          }
+          if (payload_alpha.batch_correction) {
+            options_alpha.args.push("--batch_correction")
           }
           console.log(options_alpha.args)
           await this.electronService.pythonShell.run([

@@ -265,6 +265,7 @@ export class AppComponent {
                     method: result.method,
                     merge_columns_list: result.merge_columns_list,
                     engine: result.engine,
+                    batch_correction: result.batch_correction,
                     type: 'alphastats'
                   }})
               })

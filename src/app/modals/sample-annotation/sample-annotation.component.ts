@@ -23,15 +23,15 @@ export class SampleAnnotationComponent {
     }
     this._annotation = data
   }
-  _annotation: {Sample: string, Condition: string}[] = []
+  _annotation: {Sample: string, Condition: string, Batch: string}[] = []
   get samples(): string[] {
     return this._samples
   }
 
-  @Input() set annotation(value: IDataFrame<number, {Sample: string, Condition: string}>) {
+  @Input() set annotation(value: IDataFrame<number, {Sample: string, Condition: string, Batch: string}>) {
     this._annotation = value.toArray()
   }
-  get annotation():{Sample: string, Condition: string}[] {
+  get annotation():{Sample: string, Condition: string, Batch: string}[] {
     return this._annotation
   }
 
@@ -52,10 +52,10 @@ export class SampleAnnotationComponent {
   }
 
   addSample() {
-    this._annotation.push({Sample: '', Condition: ''})
+    this._annotation.push({Sample: '', Condition: '', Batch: ''})
   }
 
-  parseFromClipboard(column: 'Sample'|'Condition') {
+  parseFromClipboard(column: 'Sample'|'Condition'|'Batch') {
     navigator.clipboard.readText().then(text => {
       text = text.trim()
       let lines = text.split(/\r?\n/).filter(l => l.length > 0)
@@ -72,7 +72,7 @@ export class SampleAnnotationComponent {
           if (this._annotation[i]) {
             this._annotation[i][column] = lines[i]
           } else {
-            this._annotation.push({Sample: lines[i], Condition: ''})
+            this._annotation.push({Sample: lines[i], Condition: '', Batch: ''})
           }
         }
       }

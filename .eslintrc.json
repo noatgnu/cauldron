@@ -3,7 +3,8 @@
   "ignorePatterns": [
     "app/**/*", // ignore nodeJs files
     "dist/**/*",
-    "release/**/*"
+    "release/**/*",
+    "src/**/*.html"
   ],
   "overrides": [
     {

@@ -37,6 +37,7 @@ export class AlphaPeptStatsDifferentialAnalysisModalComponent {
     imputation: ["knn", Validators.required],
     normalization: ["quantile", Validators.required],
     log2: [true, Validators.required],
+    batch_correction: [false],
   })
 
 
@@ -142,7 +143,7 @@ export class AlphaPeptStatsDifferentialAnalysisModalComponent {
   submit() {
     if (this.form.valid) {
       // @ts-ignore
-      const payload: {log2: boolean, input_file: string, annotation_file: string, index_col: string, evidence_file: string, data_completeness: number, imputation: string, normalization: string, method: string, merge_columns_list: string[], engine: string, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[]} = Object.assign({}, this.form.value)
+      const payload: {log2: boolean, input_file: string, annotation_file: string, index_col: string, evidence_file: string, data_completeness: number, imputation: string, normalization: string, method: string, merge_columns_list: string[], engine: string, batch_correction: boolean, comparisons: {condition_A: string, condition_B: string, comparison_label: string}[]} = Object.assign({}, this.form.value)
       for (const c of this.comparisons) {
         if (this.conditions.indexOf(c.condition_A) === -1 || this.conditions.indexOf(c.condition_B) === -1 || c.comparison_label === '') {
           alert("Please select valid conditions for all comparisons")

@@ -60,13 +60,13 @@ const menuTemplate = [
   {
     label: 'File',
     submenu: [
-      osMac ? { role: 'close' } : { role: 'quit' },
       {
         label: 'Create Annotation File',
         click: async () => {
           win?.webContents.send('file', 'create-annotation-file')
         }
-      }
+      },
+      osMac ? { role: 'close' } : { role: 'quit' },
     ]
   },
   {

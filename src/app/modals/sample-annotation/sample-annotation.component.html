@@ -7,6 +7,7 @@
     <tr>
       <th scope="col">Sample</th>
       <th scope="col">Condition</th>
+      <th scope="col">Batch</th>
     </tr>
     </thead>
     <tbody>
@@ -24,6 +25,12 @@
               <label>Condition</label>
             </div>
           </td>
+          <td>
+            <div class="form-floating">
+              <input type="text" class="form-control" [(ngModel)]="s.Batch">
+              <label>Batch</label>
+            </div>
+          </td>
         </tr>
       }
     </tbody>
@@ -34,6 +41,7 @@
       <button type="button" class="btn btn-primary" (click)="parseFromClipboard('Sample')"><i class="bi bi-clipboard"></i>Parse Sample</button>
     }
     <button type="button" class="btn btn-primary" (click)="parseFromClipboard('Condition')"><i class="bi bi-clipboard"></i>Parse Condition</button>
+    <button type="button" class="btn btn-primary" (click)="parseFromClipboard('Batch')"><i class="bi bi-clipboard"></i>Parse Batch</button>
   </div>
 
 </div>
