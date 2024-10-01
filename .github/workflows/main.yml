@@ -70,8 +70,8 @@ jobs:
 
     - name: Compress NSIS output
       run: |
-        $exclude = @("release\win-unpacked\*")
-        Get-ChildItem -Path release\* -Exclude $exclude | Compress-Archive -DestinationPath release\cauldron-win.zip
+        $files = Get-ChildItem -Path release\* | Where-Object { $_.FullName -notlike "release\\win-unpacked\\*" }
+        Compress-Archive -Path $files.FullName -DestinationPath release\cauldron-win.zip
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
