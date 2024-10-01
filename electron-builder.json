@@ -52,7 +52,7 @@
   "win": {
     "icon": "dist/assets/icons",
     "target": [
-      "nsis"
+
     ],
     "signAndEditExecutable": true,
     "publisherName": [
