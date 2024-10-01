@@ -70,8 +70,9 @@ jobs:
 
     - name: Compress NSIS output
       run: |
-        $files = Get-ChildItem -Path release\* | Where-Object { $_.FullName -notlike "release\\win-unpacked\\*" }
-        Compress-Archive -Path $files.FullName -DestinationPath release\cauldron-win.zip
+        $files = Get-ChildItem -Path release\* -Recurse | Where-Object { $_.FullName -notmatch "win-unpacked" }
+        $filesArray = $files | ForEach-Object { $_.FullName }
+        Compress-Archive -Path $filesArray -DestinationPath release\cauldron-win.zip
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
