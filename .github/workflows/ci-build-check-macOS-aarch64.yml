@@ -32,7 +32,7 @@ jobs:
         run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/
 
       - name: Install R packages
-        run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/Rscript /Users/runner/work/cauldron/cauldron/app/scripts/install_packages.R
+        run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/R --slave --no-restore --file=/Users/runner/work/cauldron/cauldron/app/scripts/install_packages.R
 
       - name: Download standalone Python 3.10
         run: |
@@ -41,7 +41,7 @@ jobs:
           tar -xzf python-3.10.15-standalone.tar.gz -C /Users/runner/work/cauldron/cauldron/app/bin/darwin/python
 
       - name: List directory contents for debugging
-        run: ls app/bin/mac/python
+        run: ls /Users/runner/work/cauldron/cauldron/app/bin/darwin/python
 
       - name: Validate R_HOME environment variable
         env:
