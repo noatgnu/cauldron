@@ -110,11 +110,11 @@ export class ElectronService {
         this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
         if (this.platform() === 'darwin') {
           if (this.arch() === 'arm64') {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "R")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "Rscript")
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "R")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "Rscript")
           } else {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "R")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "Rscript")
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "R")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "Resources", "Rscript")
           }
         } else if (this.platform() === 'win32') {
           this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")

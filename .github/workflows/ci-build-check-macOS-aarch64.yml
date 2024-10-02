@@ -26,13 +26,13 @@ jobs:
           sudo mv /Library/Frameworks/R.framework /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/
 
       - name: List Rscript Path
-        run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/
+        run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/
 
       - name: List Rscript Path
-        run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/bin/
+        run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/
 
       - name: Install R packages
-        run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/bin/Rscript /Users/runner/work/cauldron/cauldron/app/scripts/install_packages.R
+        run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/Rscript /Users/runner/work/cauldron/cauldron/app/scripts/install_packages.R
 
       - name: Download standalone Python 3.10
         run: |
