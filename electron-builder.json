@@ -15,6 +15,7 @@
       "filter": ["**/*"]
     }
   ],
+  "compression": "maximum",
   "extraResources": [
     {
       "from": "./app/bin/${os}/python",
@@ -57,7 +58,7 @@
   "win": {
     "icon": "dist/assets/icons",
     "target": [
-      "zip"
+      "tar.gz"
     ],
     "signAndEditExecutable": true,
     "publisherName": [

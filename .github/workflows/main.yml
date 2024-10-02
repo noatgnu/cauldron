@@ -17,6 +17,33 @@ jobs:
       with:
         python-version: '3.10'
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build without extra
+      run: |
+        npm run build:prod
+        electron-builder build -w --publish=never
+
+    - name: Get version from package.json
+      id: get_version
+      run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: release\cauldron-${{ steps.get_version.outputs.VERSION }}-win.tar.gz
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.tar.gz
+        asset_content_type: application/tar+gzip
+
     - name: Install R
       run: |
         Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.2.0/R-4.2.0-win.exe -OutFile R-Portable.exe
@@ -59,20 +86,8 @@ jobs:
       run: |
         cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-
-    - name: Install dependencies
-      run: npm install
-
     - name: Build Electron app
       run: npm run electron:build
-
-    - name: Get version from package.json
-      id: get_version
-      run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -81,5 +96,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: release\cauldron-${{ steps.get_version.outputs.VERSION }}-win.zip
-        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win.zip
-        asset_content_type: application/zip
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-with-extra.tar.gz
+        asset_content_type: application/tar+gzip
