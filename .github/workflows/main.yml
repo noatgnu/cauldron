@@ -86,10 +86,10 @@ jobs:
         cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
     - name: Compress Python directory
-      run: tar -czf python.tar.gz app/bin/win/python --gzip -9
+      run: tar -czf python.tar.gz app\bin\win\python --gzip -9
 
     - name: Compress R-Portable directory
-      run: tar -czf r-portable.tar.gz app/bin/win/R-Portable --gzip -9
+      run: tar -czf r-portable.tar.gz app\bin\win\R-Portable --gzip -9
       
 
     - name: Upload Python Archive
