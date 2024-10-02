@@ -35,6 +35,11 @@
       "to": "./requirements.txt"
     },
     {
+      "from": "./app/r_requirements.txt",
+      "to": "./r_requirements.txt"
+    }
+    ,
+    {
       "from": "./app/scripts",
       "to": "./scripts",
       "filter": [
