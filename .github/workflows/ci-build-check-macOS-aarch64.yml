@@ -21,6 +21,7 @@ jobs:
       - name: Install R
         run: |
           curl -o R-Portable.pkg https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg
+          mkdir -p app/bin/darwin/R-Portable
           sudo installer -pkg R-Portable.pkg -target app/bin/darwin/R-Portable
 
       - name: List directory contents for debugging
