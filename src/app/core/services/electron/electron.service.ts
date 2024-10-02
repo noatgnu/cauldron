@@ -13,7 +13,7 @@ import {BehaviorSubject, Subject} from "rxjs";
 import * as EmbeddedQueue from "embedded-queue"
 import {Settings} from "../../../settings/settings";
 import * as dataForgeFS from "data-forge-fs";
-import {platform} from "os";
+import {platform, arch} from "os";
 import {Options, PythonShell} from "python-shell";
 import * as child_process from "child_process";
 import {Job} from "embedded-queue";
@@ -48,6 +48,7 @@ export class ElectronService {
   settings: Settings = new Settings()
   files: any[] = [];
   platform!: typeof platform;
+  arch!: typeof arch;
   pythonPath: string = ""
   pythonShell!: typeof PythonShell;
   closeSubject: Subject<boolean> = new Subject<boolean>()
@@ -107,8 +108,22 @@ export class ElectronService {
       this.ipcRenderer.on('process-resource-path', (event, message) => {
         this.resourcePath = message
         this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
-        this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
-        this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
+        if (this.platform() === 'darwin') {
+          if (this.arch() === 'arm64') {
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "R.exe")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "Rscript.exe")
+          } else {
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "R")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "Rscript")
+          }
+        } else if (this.platform() === 'win32') {
+          this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
+          this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
+          if (!fs.existsSync(this.RPath)) {
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R.exe")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript.exe")
+          }
+        }
       })
       this.ipcRenderer.on('close', () => {
         this.closeSubject.next(true)
