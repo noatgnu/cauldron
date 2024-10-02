@@ -85,9 +85,6 @@ jobs:
       run: |
         cmd /c app\bin\win\python\python.exe -m pip install -r app/requirements.txt
 
-    - name: Build Electron app
-      run: npm run electron:build
-
     - name: Compress Python directory
       run: tar -czf python.tar.gz app/bin/win/python --gzip -9
 
