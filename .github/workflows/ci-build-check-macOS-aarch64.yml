@@ -32,6 +32,10 @@ jobs:
         run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/
 
       - name: Install R packages
+        env:
+          R_HOME : /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources
+          PATH : /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin:$PATH
+
         run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/bin/R --slave --no-restore --file=/Users/runner/work/cauldron/cauldron/app/scripts/install_packages.R
 
       - name: Download standalone Python 3.10
