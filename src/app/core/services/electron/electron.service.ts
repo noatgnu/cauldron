@@ -110,8 +110,8 @@ export class ElectronService {
         this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
         if (this.platform() === 'darwin') {
           if (this.arch() === 'arm64') {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "R.exe")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "Rscript.exe")
+            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "R")
+            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "bin", "Rscript")
           } else {
             this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "R")
             this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "Rscript")

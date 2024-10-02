@@ -29,7 +29,7 @@ jobs:
         run: ls /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/
 
       - name: Install R packages
-        run: Rscript app/scripts/install_packages.R
+        run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/bin/Rscript app/scripts/install_packages.R
 
       - name: Download standalone Python 3.10
         run: |
