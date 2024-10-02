@@ -77,7 +77,7 @@
     </div>
     <div class="form-floating">
       <select class="form-select" formControlName="merge_columns_list" id="merge_columns_list" multiple>
-        @for (n of testMethods; track n) {
+        @for (n of columns; track n) {
           <option value="{{n}}">{{n}}</option>
         }
       </select>
