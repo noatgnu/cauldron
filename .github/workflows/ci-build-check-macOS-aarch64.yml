@@ -28,6 +28,9 @@ jobs:
       - name: List directory contents for debugging
         run: ls /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/
 
+      - name: List Rscript Path
+        run: ls -l /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/bin/
+
       - name: Install R packages
         run: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/bin/Rscript app/scripts/install_packages.R
 
