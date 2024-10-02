@@ -21,11 +21,11 @@ jobs:
       - name: Install R
         run: |
           curl -o R-Portable.pkg https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg
-          mkdir -p app/bin/darwin/R-Portable
-          sudo installer -pkg R-Portable.pkg -target app/bin/darwin/R-Portable
+          mkdir -p /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable
+          sudo installer -pkg R-Portable.pkg -target /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable
 
       - name: List directory contents for debugging
-        run: ls app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64
+        run: ls /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64
 
       - name: Install R packages
         run: Rscript app/scripts/install_packages.R
@@ -33,15 +33,15 @@ jobs:
       - name: Download standalone Python 3.10
         run: |
           curl -L -o python-3.10.15-standalone.tar.gz https://github.com/indygreg/python-build-standalone/releases/download/20240909/cpython-3.10.15+20240909-aarch64-apple-darwin-install_only.tar.gz
-          mkdir -p app/bin/mac/python
-          tar -xzf python-3.10.15-standalone.tar.gz -C app/bin/mac/python
+          mkdir -p /Users/runner/work/cauldron/cauldron/app/bin/darwin/python
+          tar -xzf python-3.10.15-standalone.tar.gz -C /Users/runner/work/cauldron/cauldron/app/bin/darwin/python
 
       - name: List directory contents for debugging
         run: ls app/bin/mac/python
 
       - name: Validate R_HOME environment variable
         env:
-          R_HOME: app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources
+          R_HOME: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources
         shell: bash
         run: |
           if [ -z "$R_HOME" ]; then
@@ -54,14 +54,14 @@ jobs:
 
       - name: Install Python packages
         env:
-          R_HOME: app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources
+          R_HOME: /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources
         run: |
-          app/bin/mac/python/bin/python3.10 -m pip install -r app/requirements.txt
+          /Users/runner/work/cauldron/cauldron/app/bin/darwin/python/bin/python3.10 -m pip install -r app/requirements.txt
 
       - name: Validate Python installation
         run: |
-          app/bin/mac/python/bin/python3.10 -m pip --version
-          app/bin/mac/python/bin/python3.10 -m pip list
+          /Users/runner/work/cauldron/cauldron/app/bin/darwin/python/bin/python3.10 -m pip --version
+          /Users/runner/work/cauldron/cauldron/app/bin/darwin/python/bin/python3.10 -m pip list
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
