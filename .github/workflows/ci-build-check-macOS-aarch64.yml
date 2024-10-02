@@ -22,7 +22,8 @@ jobs:
         run: |
           curl -o R-Portable.pkg https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.2.0-arm64.pkg
           mkdir -p /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable
-          sudo installer -pkg R-Portable.pkg -target /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable
+          sudo installer -pkg R-Portable.pkg
+          sudo mv /Library/Frameworks/R.framework /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/
 
       - name: List directory contents for debugging
         run: ls /Users/runner/work/cauldron/cauldron/app/bin/darwin/R-Portable/Library/Frameworks/R.framework/Versions/4.2-arm64
