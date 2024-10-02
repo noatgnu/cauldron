@@ -66,6 +66,9 @@ export class ElectronService {
   resourcePath: string = ""
   translatedPlatform: string = ""
   utilitySubject: Subject<string> = new Subject<string>()
+  defaultRPath: string = ""
+  defaultRScriptPath: string = ""
+  defaultPythonPath: string = ""
 
   linkDataSubject: BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}> = new BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}>({step: 0, folder: 0, token: "", baseURL: "", name: "", session: ""})
 
@@ -109,19 +112,34 @@ export class ElectronService {
         this.resourcePath = message
         this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
         if (this.platform() === 'darwin') {
+
           if (this.arch() === 'arm64') {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "R")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "Rscript")
+            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "R")
+            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "Rscript")
           } else {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "R")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "bin", "Resources", "Rscript")
+            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "R")
+            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "Rscript")
+          }
+          if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
+            this.RPath = this.settings.RPath
+            this.RScriptPath = this.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
+          } else {
+            this.RPath = this.defaultRPath
+            this.RScriptPath = this.defaultRScriptPath
           }
         } else if (this.platform() === 'win32') {
-          this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
-          this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
+          this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
+          this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
           if (!fs.existsSync(this.RPath)) {
-            this.RPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R.exe")
-            this.RScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript.exe")
+            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R.exe")
+            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript.exe")
+          }
+          if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
+            this.RPath = this.settings.RPath
+            this.RScriptPath = this.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
+          } else {
+            this.RPath = this.defaultRPath
+            this.RScriptPath = this.defaultRScriptPath
           }
         }
       })
@@ -171,8 +189,13 @@ export class ElectronService {
       this.ipcRenderer.send('get-link-data', 'link')
       this.ipcRenderer.send('get-process-resource-path', 'python')
       this.ipcRenderer.on('python-path', (event, message) => {
-        this.pythonPath = message
-        this.pythonOptions.pythonPath = message
+        this.defaultPythonPath = message
+        if (this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
+          this.pythonPath = this.settings.pythonPath
+        } else {
+          this.pythonPath = message
+        }
+        this.pythonOptions.pythonPath = this.pythonPath.slice()
         console.log(message)
         console.log(this.pythonOptions)
         this.pythonShell.runString("import sys;print(sys.version)", this.pythonOptions).then(
@@ -189,6 +212,14 @@ export class ElectronService {
 
       this.userDataPath = this.remote.app.getPath('userData');
       this.loadConfigSettings()
+      if (this.RPath === "" && this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
+        this.RPath = this.settings.RPath.slice()
+        this.RScriptPath = this.settings.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
+      }
+      if (this.pythonPath === "" && this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
+        this.pythonPath = this.settings.pythonPath.slice()
+        this.pythonOptions.pythonPath = this.pythonPath.slice()
+      }
 
       // Notes :
       // * A NodeJS's dependency imported with 'window.require' MUST BE present in `dependencies` of both `app/package.json`

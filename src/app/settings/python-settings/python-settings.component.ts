@@ -1,4 +1,4 @@
-import {Component, NgZone} from '@angular/core';
+import {Component, EventEmitter, NgZone, Output} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
 import {SharedModule} from "../../shared/shared.module";
 import {ElectronService} from "../../core/services";
@@ -18,11 +18,13 @@ import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 export class PythonSettingsComponent {
   form = this.fb.group({
     python_path: new FormControl<string>(this.electronService.pythonPath),
+    useSystemP: new FormControl<boolean>(this.electronService.settings.useSystemPython),
   })
   processing: boolean = false
   pipList: {name: string, version: string}[] = []
   installProcess: string = ''
-  constructor(private fb: FormBuilder, private electronService: ElectronService, private zone: NgZone) {
+  @Output() changed: EventEmitter<boolean> = new EventEmitter<boolean>()
+  constructor(private fb: FormBuilder, public electronService: ElectronService, private zone: NgZone) {
     if (this.electronService.pythonPath) {
       this.form.controls['python_path'].setValue(this.electronService.pythonPath)
       this.getPipList()
@@ -60,6 +62,19 @@ export class PythonSettingsComponent {
     console.log(`${this.electronService.resourcePath + this.electronService.path.sep + 'requirements.txt'}`)
     this.processing = true
     this.electronService.ipcRenderer.send('install-python-packages', `${this.electronService.resourcePath + this.electronService.path.sep + 'requirements.txt'}`)
+
+  }
+
+  saveSettings() {
+    this.changed.emit(true)
+    if (this.form.controls['useSystemP'].value === true) {
+      this.electronService.settings.useSystemPython = true
+    } else {
+      this.electronService.settings.useSystemPython = false
+      if (this.form.controls['python_path'].value) {
+        this.electronService.pythonPath = this.form.controls['python_path'].value
+      }
+    }
 
   }
 }

@@ -16,6 +16,10 @@ export class Settings {
 
   privateKey: string = ""
   publicKey: string = ""
+  useSystemR: boolean = false
+  RPath: string = ""
+  useSystemPython: boolean = false
+  pythonPath: string = ""
 
   constructor() {
 

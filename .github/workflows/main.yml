@@ -27,8 +27,10 @@ jobs:
       run: dir app\bin\win\R-Portable
 
     - name: Install R packages
+      env:
+        R_LIBS_USER: ${{ github.workspace }}/app/bin/win/R-Portable/library
       run: Rscript app/scripts/install_packages.R
-    
+
     - name: Download standalone Python 3.10
       run: |
         Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
@@ -37,7 +39,7 @@ jobs:
 
     - name: List directory contents for debugging
       run: dir app\bin\win\python
-      
+
     - name: Validate R_HOME environment variable
       env:
         R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
@@ -50,7 +52,7 @@ jobs:
           Write-Output "R_HOME is set to $env:R_HOME"
           dir $env:R_HOME
         }
-        
+
     - name: Install Python packages
       env:
         R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable

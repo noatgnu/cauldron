@@ -38,9 +38,9 @@
       </nav>
       <div class="p-5 overflow-auto">
         @if(selectedOption=='Data Storage'){
-          <app-data-storage-settings (changed)="this.changeStatus['Data Storage']=$event"></app-data-storage-settings>
+          <app-data-storage-settings (changed)="changeStatus['Data Storage']=$event"></app-data-storage-settings>
         } @else if (selectedOption=='Python') {
-          <app-python-settings></app-python-settings>
+          <app-python-settings (changed)="changeStatus['Python']=$event"></app-python-settings>
         } @else if (selectedOption=='R') {
           <app-r-settings></app-r-settings>
         } @else if (selectedOption=='CURTAIN Backend') {
