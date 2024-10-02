@@ -37,6 +37,22 @@ export class PythonSettingsComponent {
         }
       })
     }
+    if (this.electronService.settings.useSystemPython) {
+      this.form.controls['python_path'].setValue(this.electronService.settings.pythonPath)
+    }
+    this.form.valueChanges.subscribe(() => {
+      this.changed.emit(true)
+      if (this.form.controls['useSystemP'].value === true) {
+        this.electronService.settings.useSystemPython = true
+        if (this.form.value.python_path) {
+          this.electronService.pythonPath = this.form.value.python_path
+        }
+      } else {
+        this.electronService.settings.useSystemPython = false
+        this.electronService.pythonPath = this.electronService.defaultPythonPath.slice()
+        this.form.controls['python_path'].setValue(this.electronService.pythonPath)
+      }
+    })
 
   }
 
@@ -62,19 +78,10 @@ export class PythonSettingsComponent {
     console.log(`${this.electronService.resourcePath + this.electronService.path.sep + 'requirements.txt'}`)
     this.processing = true
     this.electronService.ipcRenderer.send('install-python-packages', `${this.electronService.resourcePath + this.electronService.path.sep + 'requirements.txt'}`)
-
   }
 
   saveSettings() {
     this.changed.emit(true)
-    if (this.form.controls['useSystemP'].value === true) {
-      this.electronService.settings.useSystemPython = true
-    } else {
-      this.electronService.settings.useSystemPython = false
-      if (this.form.controls['python_path'].value) {
-        this.electronService.pythonPath = this.form.controls['python_path'].value
-      }
-    }
 
   }
 }
