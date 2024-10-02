@@ -88,12 +88,29 @@ jobs:
     - name: Build Electron app
       run: npm run electron:build
 
-    - name: Upload Release Asset
+    - name: Compress Python directory
+      run: tar -czf python.tar.gz app/bin/win/python --gzip -9
+
+    - name: Compress R-Portable directory
+      run: tar -czf r-portable.tar.gz app/bin/win/R-Portable --gzip -9
+      
+
+    - name: Upload Python Archive
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release\cauldron-${{ steps.get_version.outputs.VERSION }}-win.tar.gz
-        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-with-extra.tar.gz
+        asset_path: python.tar.gz
+        asset_name: python-win-extra.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload R-Portable Archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: r-portable.tar.gz
+        asset_name: r-portable-win-extra.tar.gz
         asset_content_type: application/tar+gzip
