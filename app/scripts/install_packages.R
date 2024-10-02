@@ -16,7 +16,7 @@ for (i in 1:nrow(packages)) {
     tryCatch(
       {
         message(paste("Installing", package, "version", version, "using BiocManager"))
-        BiocManager::install(package, version = version, dependencies = TRUE)
+        BiocManager::install(package, dependencies = TRUE)
       },
       error = function(e) {
         message(paste("Failed to install", package, "using BiocManager:", e$message))
