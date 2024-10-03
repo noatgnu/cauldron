@@ -45,7 +45,7 @@ jobs:
 
     - name: Install R
       run: |
-        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.0/R-4.4.0-win.exe -OutFile R-Portable.exe
+        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
         New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
         Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app\bin\win\R-Portable" -Wait
 
