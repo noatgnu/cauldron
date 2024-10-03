@@ -2,6 +2,28 @@
 
 [![Build](https://github.com/noatgnu/cauldron/actions/workflows/ci-build-check.yml/badge.svg)](https://github.com/noatgnu/cauldron/actions/workflows/ci-build-check.yml)
 
+
+## Acquiring the Software
+### Windows
+
+To acquire the software, follow these steps:
+
+1. **Download the Main Archive**:
+  - Go to the [GitHub Release page](https://github.com/noatgnu/cauldron/releases) of the repository.
+  - Download the archive `cauldron-<version>-win-no-extra.tar.gz`.
+
+2. **Extract the Main Archive**:
+  - Extract the contents of `cauldron-<version>-win-no-extra.tar.gz` to your desired location.
+  - Run the executable `cauldron.exe` to start the program.
+
+3. **(Optional) Download and Extract Python and R Environments**:
+  - If you are using Windows, you can download the additional archives for Python and R environments:
+    - `python-win-extra.tar.gz`
+    - `r-portable-win-extra.tar.gz`
+  - Extract these archives into the main program location where you extracted `cauldron-<version>-win-no-extra.tar.gz`.
+
+By following these steps, you will have the main program along with the necessary Python and R environments with all required packages installed.
+
 ## Windows Manual Development Setup
 
 ### Prerequisites
