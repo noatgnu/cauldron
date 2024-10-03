@@ -33,9 +33,6 @@ jobs:
       id: get_version
       run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
-    - name: Rename app to resources
-      run: |
-        mv app resources
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
@@ -50,53 +47,36 @@ jobs:
     - name: Install R
       run: |
         Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
-        New-Item -ItemType Directory -Force -Path resources/bin/win/R-Portable
-        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=resources/bin/win/R-Portable" -Wait
-
-    - name: List directory contents for debugging
-      run: dir resources/bin/win/R-Portable
-
+        New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
+        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app/bin/win/R-Portable" -Wait
+        
     - name: Install R packages
       env:
-        R_LIBS_USER: ${{ github.workspace }}/resources/bin/win/R-Portable/library
-      run: Rscript resources/scripts/install_packages.R
-    
-    - name: Compress R-Portable directory
-      run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
-      
+        R_LIBS_USER: ${{ github.workspace }}/app/bin/win/R-Portable/library
+      run: Rscript app/scripts/install_packages.R
 
     - name: Download standalone Python 3.10
       run: |
         Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
-        New-Item -ItemType Directory -Force -Path resources/bin/win/python
-        tar -xzf python-3.10.13-standalone.tar.gz -C resources/bin/win
-
-    - name: List directory contents for debugging
-      run: dir resources/bin/win/python
-
-    - name: Validate R_HOME environment variable
-      env:
-        R_HOME: ${{ github.workspace }}/resources/bin/win/R-Portable
-      shell: pwsh
-      run: |
-        if (-Not $env:R_HOME) {
-          Write-Error "R_HOME is not set"
-          exit 1
-        } else {
-          Write-Output "R_HOME is set to $env:R_HOME"
-          dir $env:R_HOME
-        }
+        New-Item -ItemType Directory -Force -Path app/bin/win/python
+        tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win
 
     - name: Install Python packages
       env:
-        R_HOME: ${{ github.workspace }}/resources/bin/win/R-Portable
+        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
       run: |
-        cmd /c resources/bin/win/python/python.exe -m pip install -r resources/requirements.txt
+        cmd /c app/bin/win/python/python.exe -m pip install -r app/requirements.txt
+
+    - name: Rename app to resources
+      run: |
+        mv app resources
 
     - name: Compress Python directory
       run: tar -czf python.tar.gz resources/bin/win/python
 
-    
+    - name: Compress R-Portable directory
+      run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
+      
     - name: Upload Python Archive
       uses: actions/upload-release-asset@v1
       env:
