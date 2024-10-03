@@ -65,7 +65,7 @@ jobs:
       env:
         R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
       run: |
-        cmd /c app/bin/win/python/python.exe -m pip install -r app/requirements.txt
+        cmd /c ${{ github.workspace }}/app/bin/win/python/python.exe -m pip install -r app/requirements.txt
 
     - name: Rename app to resources
       run: |
