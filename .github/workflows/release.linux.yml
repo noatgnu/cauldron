@@ -1,4 +1,4 @@
-name: Build and Release Electron App For Windows x64
+name: Build and Release Electron App For Linux x64
 
 on:
   release:
@@ -34,12 +34,14 @@ jobs:
     - name: Build without extra
       run: |
         npm run build:prod
-        npx electron-builder build -l --x64 --publish=never
+        npx electron-builder build -l --x64 --aarch64 --publish=never
 
     - name: Get version from package.json
       id: get_version
       run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
+    - name: List files
+      run: ls release/
 
     - name: Upload Release Asset Win tar.gz
       uses: actions/upload-release-asset@v1
@@ -58,7 +60,7 @@ jobs:
       with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.AppImage
-          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.exe
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.AppImage
           asset_content_type: application/octet-stream
 
     - name: Upload Release Asset Win NSIS
