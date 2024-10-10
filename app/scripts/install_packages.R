@@ -1,6 +1,6 @@
 options(repos = c(CRAN = "https://cloud.r-project.org/"))
 print("Installing R packages...")
-print(Sys.getenv("R_LIBS_USER")
+.libPaths(Sys.getenv("R_LIBS_USER"))
 # Install BiocManager if not already installed
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
