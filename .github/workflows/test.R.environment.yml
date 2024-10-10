@@ -37,6 +37,10 @@ jobs:
     - name: List files
       run: ls app/bin/linux/R-Portable/
 
+    - name: Set up writable permissions for R library
+      run: |
+        chmod -R 777 ${{ github.workspace }}/app/bin/linux/R-Portable/library
+
     - name: Set up R R_LIBS_USER
       run: |
         echo "R_LIBS_USER=${{ github.workspace }}/app/bin/linux/R-Portable/library" >> $GITHUB_ENV
