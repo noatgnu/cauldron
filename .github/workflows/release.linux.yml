@@ -34,7 +34,7 @@ jobs:
     - name: Build without extra
       run: |
         npm run build:prod
-        npx electron-builder build -l --x64 --aarch64 --publish=never
+        npx electron-builder build -l --x64 --arm64 --publish=never
 
     - name: Get version from package.json
       id: get_version
