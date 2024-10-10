@@ -1,0 +1,100 @@
+name: Build and Release Electron App For Linux x64
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y libopenjp2-tools
+        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build without extra
+      run: |
+        npm run build:prod
+        npx electron-builder build -l --x64 --arm64 --publish=never
+
+    - name: Get version from package.json
+      id: get_version
+      run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
+
+    - name: List files
+      run: ls release/
+
+    - name: Install R
+      run: |
+        wget https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+        mkdir -p app/bin/linux/R-Portable
+        tar -xzvf R-4.4.1.tar.gz --strip-components=1 -C app/bin/linux/R-Portable
+        cd app/bin/linux/R-Portable/
+        ./configure --enable-R-shlib --with-blas --with-lapack
+        make
+        make install
+        R --version
+
+
+    - name: Install R packages
+      env:
+        R_LIBS_USER: ${{ github.workspace }}/app/bin/linux/R-Portable/library
+      run: Rscript app/scripts/install_packages.R
+
+    - name: List files
+      run: ls app/bin/linux/R-Portable
+#    - name: Install Python packages
+#      env:
+#        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+#      run: |
+#        cmd /c ${{ github.workspace }}/app/bin/win/python/python.exe -m pip install -r app/requirements.txt
+#
+#    - name: Rename app to resources
+#      run: |
+#        mv app resources
+#
+#    - name: Compress Python directory
+#      run: tar -czf python.tar.gz resources/bin/win/python
+#
+#    - name: Compress R-Portable directory
+#      run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
+#
+#    - name: Upload Python Archive
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+#      with:
+#        upload_url: ${{ github.event.release.upload_url }}
+#        asset_path: python.tar.gz
+#        asset_name: python-win-extra.tar.gz
+#        asset_content_type: application/tar+gzip
+#
+#    - name: Upload R-Portable Archive
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+#      with:
+#        upload_url: ${{ github.event.release.upload_url }}
+#        asset_path: r-portable.tar.gz
+#        asset_name: r-portable-win-extra.tar.gz
+#        asset_content_type: application/tar+gzip
