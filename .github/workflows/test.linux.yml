@@ -41,28 +41,6 @@ jobs:
       id: get_version
       run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
-    - name: List files
-      run: ls release/
-
-    - name: Install R
-      run: |
-        wget https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
-        mkdir -p app/bin/linux/R-Portable
-        tar -xzvf R-4.4.1.tar.gz --strip-components=1 -C app/bin/linux/R-Portable
-        cd app/bin/linux/R-Portable/
-        ./configure --enable-R-shlib --with-blas --with-lapack
-        make
-        make install
-        R --version
-
-
-    - name: Install R packages
-      env:
-        R_LIBS_USER: ${{ github.workspace }}/app/bin/linux/R-Portable/library
-      run: Rscript app/scripts/install_packages.R
-
-    - name: List files
-      run: ls app/bin/linux/R-Portable
 #    - name: Install Python packages
 #      env:
 #        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
