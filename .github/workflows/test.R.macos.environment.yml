@@ -18,6 +18,11 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi
+          
+      - name: Set up gfortran in PATH
+        run: |
+          # Add gfortran to the PATH
+          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
 
       - name: Download R and Compile R
         run: |
