@@ -34,6 +34,9 @@ jobs:
         make install
         R --version
 
+    - name: List files
+      run: ls app/bin/linux/R-Portable/
+
     - name: Set up R R_LIBS_USER
       run: |
         echo "R_LIBS_USER=${{ github.workspace }}/app/bin/linux/R-Portable/library" >> $GITHUB_ENV
