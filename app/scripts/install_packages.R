@@ -1,9 +1,8 @@
 options(repos = c(CRAN = "https://cloud.r-project.org/"))
 print("Installing R packages...")
-.libPaths(Sys.getenv("R_LIBS_USER"))
 # Install BiocManager if not already installed
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
+  install.packages("BiocManager", lib=Sys.getenv("R_LIBS_USER"))
 }
 
 # Read the package list
@@ -17,7 +16,7 @@ for (i in 1:nrow(packages)) {
     tryCatch(
       {
         message(paste("Installing", package, "version", version, "using BiocManager"))
-        BiocManager::install(package, dependencies = TRUE)
+        BiocManager::install(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER")))
       },
       error = function(e) {
         message(paste("Failed to install", package, "using BiocManager:", e$message))
@@ -40,7 +39,7 @@ for (package in not_installed) {
   tryCatch(
     {
       message(paste("Attempting to install", package, "using install.packages"))
-      install.packages(package, dependencies = TRUE)
+      install.packages(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER")))
     },
     error = function(e) {
       message(paste("Failed to install", package, "using install.packages:", e$message))
