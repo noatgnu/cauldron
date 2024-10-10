@@ -16,7 +16,7 @@ for (i in 1:nrow(packages)) {
     tryCatch(
       {
         message(paste("Installing", package, "version", version, "using BiocManager"))
-        BiocManager::install(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER")))
+        BiocManager::install(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER"))
       },
       error = function(e) {
         message(paste("Failed to install", package, "using BiocManager:", e$message))
@@ -39,7 +39,7 @@ for (package in not_installed) {
   tryCatch(
     {
       message(paste("Attempting to install", package, "using install.packages"))
-      install.packages(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER")))
+      install.packages(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER"))
     },
     error = function(e) {
       message(paste("Failed to install", package, "using install.packages:", e$message))
