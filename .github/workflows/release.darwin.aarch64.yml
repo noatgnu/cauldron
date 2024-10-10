@@ -26,18 +26,38 @@ jobs:
           npx electron-builder build --mac --arm64 --publish=never
 
       - name: List files
-        run: ls releases/
+        run: ls release/
 
       - name: Get version from package.json
         id: get_version
         run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
-#      - name: Upload Release Asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ github.event.release.upload_url }}
-#          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64.tar.gz
-#          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-mac.zip
-#          asset_content_type: application/zip
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.dmg
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64-no-extra.dmg
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.dmg.blockmap
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64-no-extra.dmg.blockmap
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.tar.gz
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64-no-extra.tar.gz
+          asset_content_type: application/zip

@@ -43,6 +43,7 @@ jobs:
         asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-win.tar.gz
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.tar.gz
         asset_content_type: application/tar+gzip
+
     - name: Upload Release Asset Win NSIS
       uses: actions/upload-release-asset@v1
       env:
@@ -52,6 +53,16 @@ jobs:
           asset_path: release/cauldron-Setup-${{ steps.get_version.outputs.VERSION }}.exe
           asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.exe
           asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset Win NSIS
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: release/cauldron-Setup-${{ steps.get_version.outputs.VERSION }}.exe.blockmap
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.exe.blockmap
+        asset_content_type: application/octet-stream
 
     - name: Install R
       run: |
