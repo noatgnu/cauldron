@@ -43,34 +43,41 @@ jobs:
     - name: List files
       run: ls release/
 
-    - name: Upload Release Asset Win tar.gz
+    - name: Upload Release Asset Linux tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-linux.tar.gz
-        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.tar.gz
+        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.tar.gz
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-arm64-no-extra.tar.gz
         asset_content_type: application/tar+gzip
-
-    - name: Upload Release Asset Win NSIS
+    - name: Upload Release Asset Linux tar.gz
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-x64.tar.gz
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.tar.gz
+        asset_content_type: application/tar+gzip
+    - name: Upload Release Asset Linux AppImage
       uses: actions/upload-release-asset@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.AppImage
-          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.AppImage
+          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.AppImage
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-arm64-no-extra.AppImage
           asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset Win NSIS
+    - name: Upload Release Asset Linux AppImage
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release/cauldron-Setup-${{ steps.get_version.outputs.VERSION }}.exe.blockmap
-        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.exe.blockmap
+        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-x64.AppImage
+        asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.AppImage
         asset_content_type: application/octet-stream
 
     - name: Install R
@@ -90,12 +97,8 @@ jobs:
         R_LIBS_USER: ${{ github.workspace }}/app/bin/linux/R-Portable/library
       run: Rscript app/scripts/install_packages.R
 
-    - name: Download standalone Python 3.10
-      run: |
-        wget https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
-        New-Item -ItemType Directory -Force -Path app/bin/win/python
-        tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win
-
+    - name: List files
+      run: ls app/bin/linux/R-Portable
 #    - name: Install Python packages
 #      env:
 #        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
