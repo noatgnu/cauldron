@@ -1,9 +1,9 @@
-name: Build and Release Electron App For Linux x64
+name: Test Build For Linux x64
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
