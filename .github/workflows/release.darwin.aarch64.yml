@@ -23,7 +23,10 @@ jobs:
       - name: Build Electron app
         run: |
           npm run build:prod
-          electron-builder build --mac --arm64 --publish=never
+          npx electron-builder build --mac --arm64 --publish=never
+
+      - name: List files
+        run: ls releases/
 
       - name: Get version from package.json
         id: get_version
