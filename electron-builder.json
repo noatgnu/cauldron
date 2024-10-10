@@ -81,13 +81,13 @@
   "mac": {
     "icon": "dist/assets/icons",
     "target": [
-      "dmg", "tar.gz"
+      "dmg"
     ]
   },
   "linux": {
     "icon": "dist/assets/icons",
     "target": [
-      "AppImage"
+      "AppImage", "tar.gz"
     ]
   }
 }
