@@ -58,7 +58,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-x64.tar.gz
+        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.tar.gz
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.tar.gz
         asset_content_type: application/tar+gzip
     - name: Upload Release Asset Linux AppImage
@@ -76,7 +76,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-x64.AppImage
+        asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.AppImage
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.AppImage
         asset_content_type: application/octet-stream
 
