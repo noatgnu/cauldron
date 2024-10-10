@@ -30,7 +30,7 @@ jobs:
         tar -xzvf R-4.4.1.tar.gz
         cd R-4.4.1
         ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack
-        make
+        make -j$(nproc)
         make install
         R --version
 
