@@ -1,4 +1,4 @@
-name: Build and Release Electron App
+name: Build and Release Electron App For Windows x64
 
 on:
   release:
@@ -34,7 +34,7 @@ jobs:
       run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
 
 
-    - name: Upload Release Asset
+    - name: Upload Release Asset Win tar.gz
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
@@ -43,13 +43,22 @@ jobs:
         asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-win.tar.gz
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.tar.gz
         asset_content_type: application/tar+gzip
+    - name: Upload Release Asset Win NSIS
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+      with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: release/cauldron-Setup-${{ steps.get_version.outputs.VERSION }}.exe
+          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.exe
+          asset_content_type: application/octet-stream
 
     - name: Install R
       run: |
         Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
         New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
         Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app/bin/win/R-Portable" -Wait
-        
+
     - name: Install R packages
       env:
         R_LIBS_USER: ${{ github.workspace }}/app/bin/win/R-Portable/library
@@ -76,7 +85,7 @@ jobs:
 
     - name: Compress R-Portable directory
       run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
-      
+
     - name: Upload Python Archive
       uses: actions/upload-release-asset@v1
       env:

@@ -58,7 +58,7 @@
   "win": {
     "icon": "dist/assets/icons",
     "target": [
-      "tar.gz"
+      "tar.gz", "nsis"
     ],
     "signAndEditExecutable": true,
     "publisherName": [
@@ -69,10 +69,19 @@
   "portable": {
     "splashImage": "dist/assets/icons/electron.bmp"
   },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Cauldron",
+    "artifactName": "${productName}-Setup-${version}.${ext}"
+  },
   "mac": {
     "icon": "dist/assets/icons",
     "target": [
-      "dmg"
+      "dmg", "tar.gz"
     ]
   },
   "linux": {

@@ -1,0 +1,40 @@
+name: Build and Release Electron App For MacOS aarch64
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Electron app
+        run: |
+          npm run build:prod
+          electron-builder build --mac --arm64 --publish=never
+
+      - name: Get version from package.json
+        id: get_version
+        run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
+
+#      - name: Upload Release Asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ github.event.release.upload_url }}
+#          asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64.tar.gz
+#          asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-mac.zip
+#          asset_content_type: application/zip
