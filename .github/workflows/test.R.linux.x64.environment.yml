@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran
+        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran libharfbuzz-dev libfribidi-dev
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
         mkdir -p app/bin/linux/R-Portable
         tar -xzvf R-4.4.1.tar.gz
         cd R-4.4.1
-        ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack
+        ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-x
         make -j$(nproc)
         make install
         R --version
@@ -47,3 +47,4 @@ jobs:
 
     - name: Install R packages
       run: Rscript app/scripts/install_packages.R
+

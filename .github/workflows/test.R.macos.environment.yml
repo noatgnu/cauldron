@@ -1,0 +1,45 @@
+name: Test build R for macOS arm64
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up dependencies
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+          brew update
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi
+
+      - name: Download R and Compile R
+        run: |
+          curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+          mkdir -p app/bin/linux/R-Portable
+          tar -xzvf R-4.4.1.tar.gz
+          cd R-4.4.1
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-aqua --with-x
+          make -j$(nproc)
+          make install
+          R --version
+
+      - name: List files
+        run: ls app/bin/linux/R-Portable/
+
+      - name: Set up writable permissions for R library
+        run: |
+          chmod -R 777 ${{ github.workspace }}/app/bin/linux/R-Portable/lib
+
+      - name: Set up R R_LIBS_USER
+        run: |
+          echo "R_LIBS_USER=${{ github.workspace }}/app/bin/linux/R-Portable/lib" >> $GITHUB_ENV
+
+      - name: Install R packages
+        run: Rscript app/scripts/install_packages.R
