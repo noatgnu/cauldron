@@ -21,7 +21,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install --cask xquartz
-          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairopcre2 tcl-tk zlib
 
       - name: Add Homebrew to PATH
         run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
@@ -29,6 +29,9 @@ jobs:
       - name: Set up PATH
         run: |
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix zlib)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix xz)/bin" >> $GITHUB_PATH
+      
 
       - name: Get and compile R
         run: |
