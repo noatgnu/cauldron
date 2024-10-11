@@ -20,12 +20,12 @@ jobs:
           brew install --cask xquartz
           brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo
 #
-#      - name: Add Homebrew to PATH
-#        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
+      - name: Add Homebrew to PATH
+        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
 #
-#      - name: Set up PATH
-#        run: |
-#          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
+      - name: Set up PATH
+        run: |
+          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
 #
 #      - name: Download R and Compile R
 #        env:
@@ -52,6 +52,12 @@ jobs:
 
           export PREFIX="${{ github.workspace }}/R/arm64"
           ./build.sh r-base-dev
+
+      - name: List files
+        run: ls "${{ github.workspace }}/R/arm64"
+
+      - name: Add compiled dependencies to PATH
+        run: echo "${{ github.workspace }}/R/arm64" >> $GITHUB_PATH
 
       - name: Compile R
         run: |
