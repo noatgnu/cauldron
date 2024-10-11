@@ -21,7 +21,6 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install --cask xquartz
-          xcode-select --install
           brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo
 
       - name: Add Homebrew to PATH
