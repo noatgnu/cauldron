@@ -25,11 +25,11 @@ jobs:
       - name: Set up PATH
         run: |
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
-          echo "$(brew --prefix X11)/include" >> $GITHUB_PATH
-          echo "$(brew --prefix X11)/lib" >> $GITHUB_PATH
-
 
       - name: Download R and Compile R
+        env:
+          CPPFLAGS: -I/opt/X11/include
+          LDFLAGS: -L/opt/X11/lib
         run: |
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           mkdir -p app/bin/linux/R-Portable
