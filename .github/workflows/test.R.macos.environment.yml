@@ -41,27 +41,28 @@ jobs:
 #          make install
 #          R --version
 
-      - name: Get and compile R base dependency
-        env:
-          CPPFLAGS: -I/opt/X11/include
-          LDFLAGS: -L/opt/X11/lib
-        run: |
-          git clone https://github.com/R-macos/recipes.git
-          mkdir -p app/bin/linux/R-Portable
-          cd recipes
+#      - name: Get and compile R base dependency
+#        env:
+#          CPPFLAGS: -I/opt/X11/include
+#          LDFLAGS: -L/opt/X11/lib
+#        run: |
+#          git clone https://github.com/R-macos/recipes.git
+#          mkdir -p app/bin/linux/R-Portable
+#          cd recipes
+#
+#          export PREFIX="${{ github.workspace }}/R/arm64"
+#          ./build.sh r-base-dev
 
-          export PREFIX="${{ github.workspace }}/R/arm64"
-          ./build.sh r-base-dev
+#      - name: List files
+#        run: ls "${{ github.workspace }}/R/arm64"
 
-      - name: List files
-        run: ls "${{ github.workspace }}/R/arm64"
-
-      - name: Add compiled dependencies to PATH
-        run: echo "${{ github.workspace }}/R/arm64" >> $GITHUB_PATH
+#      - name: Add compiled dependencies to PATH
+#        run: echo "${{ github.workspace }}/R/arm64" >> $GITHUB_PATH
 
       - name: Compile R
         env:
-          CPPFLAGS: -I/opt/homebrew/include
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include
+          LDFLAGS: -L/opt/X11/lib
         run: |
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           tar -xzvf R-4.4.1.tar.gz
