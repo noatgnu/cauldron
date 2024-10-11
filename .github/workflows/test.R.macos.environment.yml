@@ -34,7 +34,7 @@ jobs:
           mkdir -p app/bin/linux/R-Portable
           tar -xzvf R-4.4.1.tar.gz
           cd R-4.4.1
-          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-aqua --with-x
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --x-libraries=/opt/X11/lib/ --x-includes=/opt/X11/include --enable-R-shlib --with-blas --with-lapack --with-aqua --with-x
           make -j$(nproc)
           make install
           R --version
