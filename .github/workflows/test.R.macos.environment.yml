@@ -43,8 +43,11 @@ jobs:
       - name: Get and compile R
         run: |
           git clone https://github.com/R-macos/recipes.git
+          mkdir -p app/bin/linux/R-Portable
           cd recipes
-          ./build.sh r-base-dev --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack
+
+          export PREFIX="${{ github.workspace }}/app/bin/darwin/R-Portable/"
+          ./build.sh r-base-dev
 
       - name: List files
         run: ls app/bin/linux/R-Portable/
