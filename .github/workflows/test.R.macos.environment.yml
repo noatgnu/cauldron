@@ -8,28 +8,25 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-
+    env:
+      CPPFLAGS: -I/opt/X11/include
+      LDFLAGS: -L/opt/X11/lib
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-#      - name: Set up dependencies
-#        run: |
-#          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
-#          brew update
-#          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst
-#
-#      - name: Add Homebrew to PATH
-#        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
-#
-#      - name: Set up PATH
-#        run: |
-#          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
-#
-#      - name: Download R and Compile R
-#        env:
-#          CPPFLAGS: -I/opt/X11/include
-#          LDFLAGS: -L/opt/X11/lib
+      - name: Set up dependencies
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+          brew update
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst
+
+      - name: Add Homebrew to PATH
+        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
+
+      - name: Set up PATH
+        run: |
+          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
 #        run: |
 #          curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
 #          mkdir -p app/bin/linux/R-Portable
