@@ -18,7 +18,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi
-          
+
       - name: Set up gfortran in PATH
         run: |
           # Add gfortran to the PATH
@@ -30,7 +30,7 @@ jobs:
           mkdir -p app/bin/linux/R-Portable
           tar -xzvf R-4.4.1.tar.gz
           cd R-4.4.1
-          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-aqua --with-x
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-aqua
           make -j$(nproc)
           make install
           R --version
