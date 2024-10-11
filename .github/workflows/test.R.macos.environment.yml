@@ -77,11 +77,11 @@ jobs:
 
       - name: Set up writable permissions for R library
         run: |
-          chmod -R 777 ${{ github.workspace }}/app/bin/darwin/R-Portable/lib
+          chmod -R 777 ${{ github.workspace }}/app/bin/darwin/R-Portable
 
       - name: Set up R R_LIBS_USER
         run: |
           echo "R_LIBS_USER=${{ github.workspace }}/app/bin/darwin/R-Portable/lib" >> $GITHUB_ENV
 
       - name: Install R packages
-        run: ${{ github.workspace }}/app/bin/darwin/R-Portable/Rscript app/scripts/install_packages.R
+        run: ${{ github.workspace }}/app/bin/darwin/R-Portable/bin/Rscript app/scripts/install_packages.R
