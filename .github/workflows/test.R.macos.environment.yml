@@ -84,4 +84,4 @@ jobs:
           echo "R_LIBS_USER=${{ github.workspace }}/app/bin/darwin/R-Portable/lib" >> $GITHUB_ENV
 
       - name: Install R packages
-        run: Rscript app/scripts/install_packages.R
+        run: ${{ github.workspace }}/app/bin/darwin/R-Portable/Rscript app/scripts/install_packages.R
