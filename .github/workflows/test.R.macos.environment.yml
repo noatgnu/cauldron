@@ -50,8 +50,11 @@ jobs:
           mkdir -p app/bin/linux/R-Portable
           cd recipes
 
-          export PREFIX="${{ github.workspace }}/app/bin/darwin/R-Portable/"
+          export PREFIX="${{ github.workspace }}/R/arm64"
           ./build.sh r-base-dev
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib
+          make -j$(nproc)
+          make install
 
       - name: List files
         run: ls app/bin/linux/R-Portable/
