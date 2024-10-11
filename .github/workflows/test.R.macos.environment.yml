@@ -19,10 +19,15 @@ jobs:
           brew update
           brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst
 
-      - name: Set up gfortran in PATH
+      - name: Add Homebrew to PATH
+        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
+
+      - name: Set up PATH
         run: |
-          # Add gfortran to the PATH
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix X11)/include" >> $GITHUB_PATH
+          echo "$(brew --prefix X11)/lib" >> $GITHUB_PATH
+
 
       - name: Download R and Compile R
         run: |
