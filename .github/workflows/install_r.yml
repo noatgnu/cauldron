@@ -1,0 +1,33 @@
+name: Install R and Packages
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'Operating System'
+        required: true
+        default: 'windows-latest'
+        type: string
+      arch:
+        description: 'Architecture'
+        required: true
+        default: 'x64'
+        type: string
+
+
+jobs:
+  setup_environment:
+    uses: ./.github/workflows/setup_${{ inputs.os }}_environment.yml
+    with:
+      os: ${{ inputs.os }}
+      arch: ${{ inputs.arch }}
+
+  install_r:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        if: inputs.os == 'windows-latest'

@@ -1,0 +1,33 @@
+name: Setup Windows Environment
+
+on:
+  workflow_call:
+      inputs:
+        os:
+            description: 'Operating System'
+            required: true
+            default: 'windows-latest'
+            type: string
+        arch:
+            description: 'Architecture'
+            required: true
+            default: 'x64'
+            type: string
+
+jobs:
+  setup_windows_environment:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
