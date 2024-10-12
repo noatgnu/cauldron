@@ -65,7 +65,9 @@ jobs:
       - name: Compile R
         env:
           CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
-          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib
+          LZO_DIR: /opt/homebrew/opt/lzo
+          CFLAGS: -I/opt/homebrew/opt/lzo/include
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
@@ -96,7 +98,9 @@ jobs:
       - name: Install R packages
         env:
           CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
-          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib
+          LZO_DIR: /opt/homebrew/opt/lzo
+          CFLAGS: -I/opt/homebrew/opt/lzo/include
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
