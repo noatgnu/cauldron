@@ -18,7 +18,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install --cask xquartz
-          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis open-mpi
 #
       - name: Add Homebrew to PATH
         run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
@@ -73,7 +73,7 @@ jobs:
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           tar -xzvf R-4.4.1.tar.gz
           cd R-4.4.1
-          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk --with-mpi
           make -j$(nproc)
           make install
 
