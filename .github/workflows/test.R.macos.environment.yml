@@ -92,3 +92,24 @@ jobs:
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
         run: ${{ github.workspace }}/app/bin/darwin/R-Portable/bin/Rscript app/scripts/install_packages.R
+
+      - name: Download Portable Python
+        run: |
+          curl -O https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
+          mkdir -p app/bin/darwin/
+          tar -xzvf cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz -C app/bin/darwin/
+
+      - name: List files
+        run: ls app/bin/darwin
+
+      - name: Install Python Packages
+        run: ${{ github.workspace }}/app/bin/darwin/python/bin/python3 -m pip install -r app/requirements.txt
+
+      - name: Rename app to resources
+        run: |
+          mv app resources
+
+
+
+
+
