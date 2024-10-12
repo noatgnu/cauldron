@@ -51,11 +51,11 @@ jobs:
 
     - name: Download Portable Python
       run: |
-        curl -O https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+        curl -LO https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
 
     - name: extract Python
       run: |
-        tar -xzf cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz -C app/bin/linux
+        tar -xzf cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz -C app/bin/linux --no-same-owner --no-same-permissions
 
     - name: List files
       run: ls app/bin/linux
