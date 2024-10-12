@@ -17,11 +17,13 @@ import {platform, arch} from "os";
 import {Options, PythonShell} from "python-shell";
 import * as child_process from "child_process";
 import {Job} from "embedded-queue";
+import * as axios from "axios";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ElectronService {
+
   ipcRenderer!: typeof ipcRenderer;
   webFrame!: typeof webFrame;
   childProcess!: typeof childProcess;
@@ -378,5 +380,13 @@ export class ElectronService {
     }
 
     return null;
+  }
+
+  async downloadAndSaveFile(url: string, folder: string) {
+    const client = new axios.Axios()
+    const response = await client.get(url, {responseType: 'stream'})
+    const fileName = url.split("/").pop()
+    const filePath = this.path.join(folder, fileName as string)
+    const writer = this.fs.createWriteStream(filePath)
   }
 }

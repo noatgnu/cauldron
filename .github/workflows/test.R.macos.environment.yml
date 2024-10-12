@@ -69,7 +69,7 @@ jobs:
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           tar -xzvf R-4.4.1.tar.gz
           cd R-4.4.1
-          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack
+          ./configure --prefix=${{ github.workspace }}/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk
           make -j$(nproc)
           make install
 
