@@ -108,7 +108,10 @@ jobs:
         run: ls app/bin/darwin
 
       - name: Install Python Packages
-        run: ${{ github.workspace }}/app/bin/darwin/python/bin/python3 -m pip install -r app/requirements.txt
+        env:
+          R_HOME: ${{ github.workspace }}/app/bin/darwin/R-Portable
+        run: |
+          ${{ github.workspace }}/app/bin/darwin/python/bin/python3 -m pip install -r app/requirements.txt
 
       - name: Rename app to resources
         run: |
