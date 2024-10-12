@@ -26,6 +26,7 @@ jobs:
       - name: Set up PATH
         run: |
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/opt/jpeg/bin" >> $GITHUB_PATH
 #
 #      - name: Download R and Compile R
 #        env:
@@ -61,10 +62,11 @@ jobs:
 
       - name: Compile R
         env:
-          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include
-          LDFLAGS: -L/opt/X11/lib
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
         run: |
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           tar -xzvf R-4.4.1.tar.gz
@@ -87,16 +89,17 @@ jobs:
 
       - name: Install R packages
         env:
-          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include
-          LDFLAGS: -L/opt/X11/lib
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
         run: ${{ github.workspace }}/app/bin/darwin/R-Portable/bin/Rscript app/scripts/install_packages.R
 
       - name: Download Portable Python
         run: |
           curl -O https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
-        
+
       - name: Extract Python
         run: |
           tar -xzf cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz -C app/bin/darwin/
