@@ -96,8 +96,10 @@ jobs:
       - name: Download Portable Python
         run: |
           curl -O https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
-          mkdir -p app/bin/darwin/
-          tar -xzvf cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz -C app/bin/darwin/
+        
+      - name: Extract Python
+        run: |
+          tar -xzf cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz -C app/bin/darwin/
 
       - name: List files
         run: ls app/bin/darwin

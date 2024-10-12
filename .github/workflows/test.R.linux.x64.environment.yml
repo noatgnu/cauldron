@@ -1,4 +1,4 @@
-name: Test Build For Unix x64
+name: Test Build For Linux x64
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran libharfbuzz-dev libfribidi-dev
+        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran libharfbuzz-dev libfribidi-dev tcl-dev tk-dev
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
         mkdir -p app/bin/linux/R-Portable
         tar -xzvf R-4.4.1.tar.gz
         cd R-4.4.1
-        ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-x
+        ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-x --with-tcltk
         make -j$(nproc)
         make install
         R --version
@@ -47,4 +47,24 @@ jobs:
 
     - name: Install R packages
       run: Rscript app/scripts/install_packages.R
+
+
+    - name: Download Portable Python
+      run: |
+        curl -O https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+
+    - name: extract Python
+      run: |
+        tar -xzf cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz -C app/bin/linux
+
+    - name: List files
+      run: ls app/bin/linux
+
+    - name: Install Python packages
+      run: |
+        ${{ github.workspace }}/app/bin/linux/python/python -m pip install -r app/requirements.txt
+
+    - name: Rename app to resources
+      run: |
+          mv app resources
 

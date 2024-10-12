@@ -77,9 +77,9 @@ jobs:
 
     - name: Download standalone Python 3.10
       run: |
-        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
+        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.15-standalone.tar.gz
         New-Item -ItemType Directory -Force -Path app/bin/win/python
-        tar -xzf python-3.10.13-standalone.tar.gz -C app/bin/win
+        tar -xzf python-3.10.15-standalone.tar.gz -C app/bin/win
 
     - name: Install Python packages
       env:
