@@ -18,7 +18,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install --cask xquartz
-          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc
 #
       - name: Add Homebrew to PATH
         run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
@@ -68,6 +68,7 @@ jobs:
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
           HDF5_DIR: /opt/homebrew/opt/hdf5
+          BLOSC_DIR: /opt/homebrew/opt/c-blosc
         run: |
           curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
           tar -xzvf R-4.4.1.tar.gz
@@ -96,6 +97,7 @@ jobs:
           TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
           PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
           HDF5_DIR: /opt/homebrew/opt/hdf5
+          BLOSC_DIR: /opt/homebrew/opt/c-blosc
         run: ${{ github.workspace }}/app/bin/darwin/R-Portable/bin/Rscript app/scripts/install_packages.R
 
       - name: Download Portable Python
