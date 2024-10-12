@@ -86,4 +86,9 @@ jobs:
           echo "R_LIBS_USER=${{ github.workspace }}/app/bin/darwin/R-Portable/lib" >> $GITHUB_ENV
 
       - name: Install R packages
+        env:
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include
+          LDFLAGS: -L/opt/X11/lib
+          TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
         run: ${{ github.workspace }}/app/bin/darwin/R-Portable/bin/Rscript app/scripts/install_packages.R
