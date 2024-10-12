@@ -1,5 +1,9 @@
 options(repos = c(CRAN = "https://cloud.r-project.org/"))
 print("Installing R packages...")
+
+# Get the list of base packages
+base_packages <- rownames(installed.packages(priority = "base"))
+
 # Install BiocManager if not already installed
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager", lib=Sys.getenv("R_LIBS_USER"))
@@ -12,7 +16,7 @@ packages <- read.table("app/r_requirements.txt", stringsAsFactors = FALSE)
 for (i in 1:nrow(packages)) {
   package <- packages[i, 1]
   version <- packages[i, 2]
-  if (!require(package, character.only = TRUE)) {
+  if (!(package %in% base_packages) && !require(package, character.only = TRUE)) {
     tryCatch(
       {
         message(paste("Installing", package, "version", version, "using BiocManager"))
@@ -29,7 +33,7 @@ for (i in 1:nrow(packages)) {
 not_installed <- c()
 for (i in 1:nrow(packages)) {
   package <- packages[i, 1]
-  if (!require(package, character.only = TRUE)) {
+  if (!(package %in% base_packages) && !require(package, character.only = TRUE)) {
     not_installed <- c(not_installed, package)
   }
 }
