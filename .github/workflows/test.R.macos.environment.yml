@@ -27,6 +27,8 @@ jobs:
         run: |
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
           echo "/opt/homebrew/opt/jpeg/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/opt/open-mpi/bin" >> $GITHUB_PATH
+          
 #
 #      - name: Download R and Compile R
 #        env:
