@@ -28,6 +28,10 @@ jobs:
           echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
           echo "/opt/homebrew/opt/jpeg/bin" >> $GITHUB_PATH
           echo "/opt/homebrew/opt/open-mpi/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix hdf5)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix lzo)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix c-blosc)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix bzip2)/bin" >> $GITHUB_PATH
           
 #
 #      - name: Download R and Compile R
