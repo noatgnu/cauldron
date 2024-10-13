@@ -1,4 +1,4 @@
-name: Test Build For Linux x64
+name: Test build R for Ubuntu
 
 on:
   push:
@@ -10,61 +10,103 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libbz2-dev libzstd-dev liblzma-dev libcurl4-openssl-dev libssl-dev libxml2-dev gfortran libharfbuzz-dev libfribidi-dev tcl-dev tk-dev
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xorg-dev \
+            gfortran \
+            libpng-dev \
+            libjpeg-dev \
+            liblzma-dev \
+            libpcre2-dev \
+            libcurl4-openssl-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libx11-dev \
+            libxext-dev \
+            libxrender-dev \
+            libxtst-dev \
+            libcairo2-dev \
+            tcl-dev \
+            tk-dev \
+            libhdf5-dev \
+            libblosc-dev \
+            libhiredis-dev \
+            libopenmpi-dev \
+            lzo-dev \
+            bzip2
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Compile R
+        env:
+          CPPFLAGS: -I/usr/include -I/usr/include/xorg
+          LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+          CFLAGS: -I/usr/include
+          TCL_LIBRARY: /usr/lib/tcltk
+          TK_LIBRARY: /usr/lib/tcltk
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig
+          C_INCLUDE_PATH: /usr/include
+          LIBRARY_PATH: /usr/lib
+        run: |
+          curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+          tar -xzvf R-4.4.1.tar.gz
+          cd R-4.4.1
+          ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk --with-mpi
+          make -j$(nproc)
+          make install
 
-    - name: Install R
-      run: |
-        wget https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
-        mkdir -p app/bin/linux/R-Portable
-        tar -xzvf R-4.4.1.tar.gz
-        cd R-4.4.1
-        ./configure --prefix=${{ github.workspace }}/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-x --with-tcltk
-        make -j$(nproc)
-        make install
-        R --version
+      - name: List files
+        run: ls app/bin/linux/R-Portable/
 
-    - name: List files
-      run: ls app/bin/linux/R-Portable/
+      - name: Set up writable permissions for R library
+        run: |
+          chmod -R 777 ${{ github.workspace }}/app/bin/linux/R-Portable
 
-    - name: Set up writable permissions for R library
-      run: |
-        chmod -R 777 ${{ github.workspace }}/app/bin/linux/R-Portable/lib
+      - name: Set up R R_LIBS_USER
+        run: |
+          echo "R_LIBS_USER=${{ github.workspace }}/app/bin/linux/R-Portable/lib" >> $GITHUB_ENV
 
-    - name: Set up R R_LIBS_USER
-      run: |
-        echo "R_LIBS_USER=${{ github.workspace }}/app/bin/linux/R-Portable/lib" >> $GITHUB_ENV
+      - name: Install R packages
+        env:
+          CPPFLAGS: -I/usr/include -I/usr/include/xorg
+          LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+          CFLAGS: -I/usr/include
+          TCL_LIBRARY: /usr/lib/tcltk
+          TK_LIBRARY: /usr/lib/tcltk
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig
+          C_INCLUDE_PATH: /usr/include
+          LIBRARY_PATH: /usr/lib
+          R_HOME: ${{ github.workspace }}/app/bin/linux/R-Portable
+        run: ${{ github.workspace }}/app/bin/linux/R-Portable/bin/Rscript app/scripts/install_packages.R
 
-    - name: Install R packages
-      run: Rscript app/scripts/install_packages.R
+      - name: Download Portable Python
+        run: |
+          curl -LO https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
 
+      - name: Extract Python
+        run: |
+          tar -xzf cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz -C app/bin/linux --no-same-owner --no-same-permissions
 
-    - name: Download Portable Python
-      run: |
-        curl -LO https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+      - name: List files
+        run: ls app/bin/linux
 
-    - name: extract Python
-      run: |
-        tar -xzf cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz -C app/bin/linux --no-same-owner --no-same-permissions
+      - name: Install Python Packages
+        env:
+          CPPFLAGS: -I/usr/include -I/usr/include/xorg
+          LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+          CFLAGS: -I/usr/include
+          TCL_LIBRARY: /usr/lib/tcltk
+          TK_LIBRARY: /usr/lib/tcltk
+          PKG_CONFIG_PATH: /usr/lib/pkgconfig
+          C_INCLUDE_PATH: /usr/include
+          LIBRARY_PATH: /usr/lib
+          R_HOME: ${{ github.workspace }}/app/bin/linux/R-Portable
+        run: |
+          ${{ github.workspace }}/app/bin/linux/python/bin/python3 -m pip install -r app/requirements.txt
 
-    - name: List files
-      run: ls app/bin/linux
-
-    - name: Install Python packages
-      run: |
-        ${{ github.workspace }}/app/bin/linux/python/python -m pip install -r app/requirements.txt
-
-    - name: Rename app to resources
-      run: |
+      - name: Rename app to resources
+        run: |
           mv app resources
-
