@@ -37,7 +37,7 @@ jobs:
             libblosc-dev \
             libhiredis-dev \
             libopenmpi-dev \
-            lzo-dev \
+            liblzo2-dev \
             bzip2
 
       - name: Compile R
