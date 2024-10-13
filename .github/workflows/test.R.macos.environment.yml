@@ -18,7 +18,7 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
           brew update
           brew install --cask xquartz
-          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis open-mpi lzo
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis open-mpi lzo bzip2
 #
       - name: Add Homebrew to PATH
         run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
@@ -64,8 +64,8 @@ jobs:
 
       - name: Compile R
         env:
-          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
-          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
           LZO_DIR: /opt/homebrew/opt/lzo
           CFLAGS: -I/opt/homebrew/opt/lzo/include
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
@@ -97,8 +97,8 @@ jobs:
 
       - name: Install R packages
         env:
-          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include
-          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
           LZO_DIR: /opt/homebrew/opt/lzo
           CFLAGS: -I/opt/homebrew/opt/lzo/include
           TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
@@ -123,6 +123,17 @@ jobs:
 
       - name: Install Python Packages
         env:
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
+          LZO_DIR: /opt/homebrew/opt/lzo
+          CFLAGS: -I/opt/homebrew/opt/lzo/include
+          TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
+          HDF5_DIR: /opt/homebrew/opt/hdf5
+          BLOSC_DIR: /opt/homebrew/opt/c-blosc
+          C_INCLUDE_PATH: /opt/homebrew/Cellar/lzo/2.10/include/lzo:/opt/homebrew/Cellar/lzo/2.10/include/
+          LIBRARY_PATH: /opt/homebrew/lib
           R_HOME: ${{ github.workspace }}/app/bin/darwin/R-Portable
         run: |
           ${{ github.workspace }}/app/bin/darwin/python/bin/python3 -m pip install -r app/requirements.txt
