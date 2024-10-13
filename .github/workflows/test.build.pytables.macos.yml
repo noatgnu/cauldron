@@ -1,0 +1,68 @@
+name: Test build PyTables macOS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up dependencies
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+          brew update
+          brew install --cask xquartz
+          brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis open-mpi lzo bzip2
+#
+      - name: Add Homebrew to PATH
+        run: echo "/opt/homebrew/bin" >> $GITHUB_PATH
+#
+      - name: Set up PATH
+        run: |
+          echo "$(brew --prefix gcc)/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/opt/jpeg/bin" >> $GITHUB_PATH
+          echo "/opt/homebrew/opt/open-mpi/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix hdf5)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix lzo)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix c-blosc)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix bzip2)/bin" >> $GITHUB_PATH
+
+      - name: Download Portable Python
+        run: |
+          curl -LO https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
+
+      - name: Extract Python
+        run: |
+          mkdir -p app/bin/darwin
+          tar -xzf cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz -C app/bin/darwin --no-same-owner --no-same-permissions
+
+      - name: List files
+        run: ls app/bin/darwin
+
+      - name: Install Python Packages
+        env:
+          CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+          LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
+          LZO_DIR: /opt/homebrew/opt/lzo
+          CFLAGS: -I/opt/homebrew/opt/lzo/include
+          TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+          PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
+          HDF5_DIR: /opt/homebrew/opt/hdf5
+          BLOSC_DIR: /opt/homebrew/opt/c-blosc
+          C_INCLUDE_PATH: /opt/homebrew/Cellar/lzo/2.10/include/lzo:/opt/homebrew/Cellar/lzo/2.10/include/
+          LIBRARY_PATH: /opt/homebrew/lib
+        run: |
+          ${{ github.workspace }}/app/bin/darwin/python/bin/python3 -m pip install tables
+
+
+
+
+
+
