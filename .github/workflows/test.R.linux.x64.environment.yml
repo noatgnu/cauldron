@@ -43,8 +43,8 @@ jobs:
 
       - name: Compile R
         env:
-          CPPFLAGS: -I/usr/include -I/usr/include/xorg
-          LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+          CPPFLAGS: -I/usr/include -I/usr/include/xorg -I/usr/include/readline
+          LDFLAGS: -L/usr/lib -L/usr/lib/xorg -L/usr/lib/readline
           CFLAGS: -I/usr/include
           TCL_LIBRARY: /usr/lib/tcltk
           TK_LIBRARY: /usr/lib/tcltk
