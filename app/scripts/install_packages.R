@@ -42,8 +42,13 @@ for (i in 1:nrow(packages)) {
 for (package in not_installed) {
   tryCatch(
     {
-      message(paste("Attempting to install", package, "using install.packages"))
-      install.packages(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER"))
+      if (package == "Rmpi") {
+        message("Installing Rmpi with special configuration arguments")
+        install.packages("Rmpi", configure.args = c("ORTED=prted"), lib=Sys.getenv("R_LIBS_USER"))
+      } else {
+        message(paste("Attempting to install", package, "using install.packages"))
+        install.packages(package, dependencies = TRUE, lib=Sys.getenv("R_LIBS_USER"))
+      }
     },
     error = function(e) {
       message(paste("Failed to install", package, "using install.packages:", e$message))

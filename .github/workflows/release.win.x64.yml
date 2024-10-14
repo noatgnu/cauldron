@@ -64,55 +64,55 @@ jobs:
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-win-no-extra.exe.blockmap
         asset_content_type: application/octet-stream
 
-    - name: Install R
-      run: |
-        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
-        New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
-        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app/bin/win/R-Portable" -Wait
-
-    - name: Install R packages
-      env:
-        R_LIBS_USER: ${{ github.workspace }}/app/bin/win/R-Portable/library
-      run: Rscript app/scripts/install_packages.R
-
-    - name: Download standalone Python 3.10
-      run: |
-        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.15-standalone.tar.gz
-        New-Item -ItemType Directory -Force -Path app/bin/win/python
-        tar -xzf python-3.10.15-standalone.tar.gz -C app/bin/win --no-same-owner --no-same-permissions
-
-    - name: Install Python packages
-      env:
-        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
-      run: |
-        cmd /c ${{ github.workspace }}/app/bin/win/python/python.exe -m pip install -r app/requirements.txt
-
-    - name: Rename app to resources
-      run: |
-        mv app resources
-
-    - name: Compress Python directory
-      run: tar -czf python.tar.gz resources/bin/win/python
-
-    - name: Compress R-Portable directory
-      run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
-
-    - name: Upload Python Archive
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: python.tar.gz
-        asset_name: python-win-extra.tar.gz
-        asset_content_type: application/tar+gzip
-
-    - name: Upload R-Portable Archive
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: r-portable.tar.gz
-        asset_name: r-portable-win-extra.tar.gz
-        asset_content_type: application/tar+gzip
+#    - name: Install R
+#      run: |
+#        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
+#        New-Item -ItemType Directory -Force -Path app/bin/win/R-Portable
+#        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=app/bin/win/R-Portable" -Wait
+#
+#    - name: Install R packages
+#      env:
+#        R_LIBS_USER: ${{ github.workspace }}/app/bin/win/R-Portable/library
+#      run: Rscript app/scripts/install_packages.R
+#
+#    - name: Download standalone Python 3.10
+#      run: |
+#        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.15-standalone.tar.gz
+#        New-Item -ItemType Directory -Force -Path app/bin/win/python
+#        tar -xzf python-3.10.15-standalone.tar.gz -C app/bin/win --no-same-owner --no-same-permissions
+#
+#    - name: Install Python packages
+#      env:
+#        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
+#      run: |
+#        cmd /c ${{ github.workspace }}/app/bin/win/python/python.exe -m pip install -r app/requirements.txt
+#
+#    - name: Rename app to resources
+#      run: |
+#        mv app resources
+#
+#    - name: Compress Python directory
+#      run: tar -czf python.tar.gz resources/bin/win/python
+#
+#    - name: Compress R-Portable directory
+#      run: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
+#
+#    - name: Upload Python Archive
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+#      with:
+#        upload_url: ${{ github.event.release.upload_url }}
+#        asset_path: python.tar.gz
+#        asset_name: python-win-extra.tar.gz
+#        asset_content_type: application/tar+gzip
+#
+#    - name: Upload R-Portable Archive
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+#      with:
+#        upload_url: ${{ github.event.release.upload_url }}
+#        asset_path: r-portable.tar.gz
+#        asset_name: r-portable-win-extra.tar.gz
+#        asset_content_type: application/tar+gzip

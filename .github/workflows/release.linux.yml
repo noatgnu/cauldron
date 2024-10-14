@@ -46,7 +46,7 @@ jobs:
     - name: Upload Release Asset Linux tar.gz
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.tar.gz
@@ -55,7 +55,7 @@ jobs:
     - name: Upload Release Asset Linux tar.gz
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.tar.gz
@@ -64,7 +64,7 @@ jobs:
     - name: Upload Release Asset Linux AppImage
       uses: actions/upload-release-asset@v1
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}-arm64.AppImage
@@ -73,32 +73,32 @@ jobs:
     - name: Upload Release Asset Linux AppImage
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has `repo` scope
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.AppImage
         asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-linux-x64-no-extra.AppImage
         asset_content_type: application/octet-stream
 
-    - name: Install R
-      run: |
-        wget https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
-        mkdir -p app/bin/linux/R-Portable
-        tar -xzvf R-4.4.1.tar.gz -C --strip-components=1 app/bin/linux/R-Portable
-        cd app/bin/linux/R-Portable/
-        ./configure --enable-R-shlib --with-blas --with-lapack
-        make
-        make install
-        R --version
-
-
-    - name: Install R packages
-      env:
-        R_LIBS_USER: ${{ github.workspace }}/app/bin/linux/R-Portable/library
-      run: Rscript app/scripts/install_packages.R
-
-    - name: List files
-      run: ls app/bin/linux/R-Portable
+#    - name: Install R
+#      run: |
+#        wget https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+#        mkdir -p app/bin/linux/R-Portable
+#        tar -xzvf R-4.4.1.tar.gz -C --strip-components=1 app/bin/linux/R-Portable
+#        cd app/bin/linux/R-Portable/
+#        ./configure --enable-R-shlib --with-blas --with-lapack
+#        make
+#        make install
+#        R --version
+#
+#
+#    - name: Install R packages
+#      env:
+#        R_LIBS_USER: ${{ github.workspace }}/app/bin/linux/R-Portable/library
+#      run: Rscript app/scripts/install_packages.R
+#
+#    - name: List files
+#      run: ls app/bin/linux/R-Portable
 #    - name: Install Python packages
 #      env:
 #        R_HOME: ${{ github.workspace }}/app/bin/win/R-Portable
