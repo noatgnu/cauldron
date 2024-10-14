@@ -114,13 +114,12 @@ export class ElectronService {
         this.resourcePath = message
         this.scriptFolderPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), 'scripts')
         if (this.platform() === 'darwin') {
-
           if (this.arch() === 'arm64') {
-            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "R")
-            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2-arm64", "Resources", "bin", "Rscript")
+            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
+            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
           } else {
-            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "R")
-            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "Library", "Frameworks", "R.framework", "Versions", "4.2", "Resources", "bin", "Rscript")
+            this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
+            this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
           }
           if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
             this.RPath = this.settings.RPath
@@ -136,6 +135,16 @@ export class ElectronService {
             this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R.exe")
             this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript.exe")
           }
+          if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
+            this.RPath = this.settings.RPath
+            this.RScriptPath = this.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
+          } else {
+            this.RPath = this.defaultRPath
+            this.RScriptPath = this.defaultRScriptPath
+          }
+        } else if (this.platform() === 'linux') {
+          this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
+          this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
           if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
             this.RPath = this.settings.RPath
             this.RScriptPath = this.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
