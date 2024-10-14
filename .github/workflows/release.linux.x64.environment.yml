@@ -38,6 +38,7 @@ jobs:
             libopenmpi-dev \
             liblzo2-dev \
             libomp-dev \
+            libreadline-dev \
             bzip2
 
       - name: Compile R

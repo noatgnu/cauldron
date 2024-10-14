@@ -1,9 +1,9 @@
 name: Build and release R and Python environment for macOS arm64
 
 on:
-  push:
-    branches:
-      - master
+  release:
+    types:
+      - created
 
 jobs:
   build:
