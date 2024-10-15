@@ -18,13 +18,22 @@ const translateOSPlatform = (platform: string) => {
   }
 }
 
+
 const appPath = app.getAppPath().replace(path.sep + "app.asar", "")
+
+let extended_path = ["python.exe"]
+
+if (platform() !== "win32") {
+  extended_path = ["bin", "python"]
+}
 
 let pyPath = ""
 const pythonPathList = [
-  [appPath, "resources", "bin", translateOSPlatform(platform()), "python", "python.exe"].join(path.sep),
-  path.join(__dirname, "bin", translateOSPlatform(platform()), "python", "python.exe").replace(path.sep + "app.asar", ""),
+  [appPath, "resources", "bin", translateOSPlatform(platform()), "python", ...extended_path].join(path.sep),
+  path.join(__dirname, "bin", translateOSPlatform(platform()), "python", ...extended_path).replace(path.sep + "app.asar", ""),
 ]
+
+
 
 for (const pythonPath of pythonPathList) {
   if (fs.existsSync(pythonPath.replace(path.sep + "app.asar", ""))) {
