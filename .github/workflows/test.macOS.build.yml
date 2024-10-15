@@ -1,8 +1,9 @@
-name: Build and Release Electron App For MacOS aarch64
+name: Test build R for macOS arm64
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -61,3 +62,7 @@ jobs:
           asset_path: release/cauldron-${{ steps.get_version.outputs.VERSION }}.tar.gz
           asset_name: cauldron-${{ steps.get_version.outputs.VERSION }}-darwin-arm64-no-extra.tar.gz
           asset_content_type: application/tar+gzip
+
+
+
+
