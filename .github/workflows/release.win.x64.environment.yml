@@ -22,13 +22,6 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Build without extra
-      run: |
-        npm run electron:build
-
     - name: Get version from package.json
       id: get_version
       run: echo "::set-output name=VERSION::$(node -p -e "require('./package.json').version")"
