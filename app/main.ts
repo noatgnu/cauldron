@@ -1,9 +1,12 @@
-import {app, BrowserWindow, screen, Menu, ipcMain, dialog} from 'electron';
+import {app, BrowserWindow, screen, Menu, ipcMain, dialog, ipcRenderer} from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as main from '@electron/remote/main'
 import {platform} from "os";
 import * as child_process from "child_process";
+import axios from "axios";
+import * as tar from "tar-stream";
+import * as zlib from "zlib";
 
 const translateOSPlatform = (platform: string) => {
   switch (platform) {
@@ -45,7 +48,7 @@ for (const pythonPath of pythonPathList) {
 
 if (pyPath === "") {
   console.error("Could not find python executable")
-  process.exit(1)
+  //process.exit(1)
 }
 
 let win: BrowserWindow | null = null;
@@ -372,7 +375,9 @@ try {
   ipcMain.on('get-process-resource-path', (event, arg) => {
     win?.webContents.send('process-resource-path', __dirname)
   })
-
+  ipcMain.on('get-app-version', (event, arg) => {
+    win?.webContents.send('app-version', app.getVersion())
+  })
   ipcMain.on('install-python-packages', (event, arg) => {
     console.log(pyPath)
     console.log(['-m', 'pip', 'install', '-r', `${__dirname.replace(path.sep+"app.asar", "") + path.sep + 'requirements.txt'}`])
@@ -397,7 +402,154 @@ try {
     win?.webContents.send('link-data', linkData)
   })
 
+  ipcMain.on('download-extra', (event, arg) => {
+    console.log(arg)
+    const url = arg.url
+    const tempFolder = arg.tempFolder
+    if (!fs.existsSync(tempFolder)) {
+      fs.mkdirSync(tempFolder)
+    }
+    const tempFilePath = path.join(tempFolder, arg.fileName)
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath)
+    }
+    const file = fs.createWriteStream(tempFilePath);
+
+    axios({
+      method: "get",
+      url: url,
+      headers: {
+        'accept': 'application/octet-stream',
+      },
+      responseType: 'stream'
+    }).then((response) => {
+      const totalSize = parseInt(response.headers['content-length'], 10);
+      let downloadedSize = 0;
+      response.data.on('data', (chunk: Buffer) => {
+        downloadedSize += chunk.length;
+        const progress = (downloadedSize / totalSize) * 100;
+        win?.webContents.send('download-extra-message', {total: totalSize, progress: downloadedSize, fileName: arg.fileName, completed: false, percentage: progress, message: `Downloading ${arg.fileName}`, file: null})
+      });
+      response.data.pipe(file);
+      response.data.on('end', () => {
+        win?.webContents.send('download-extra-message', {total: totalSize, progress: downloadedSize, fileName: arg.fileName, completed: true, percentage: 100, message: `Downloading ${arg.fileName}`, file: null})
+        if (arg.fileName.startsWith("python")) {
+          if (fs.existsSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "python"))) {
+            fs.rmSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "python"), {recursive: true})
+          }
+        } else if (arg.fileName.startsWith("r-portable")) {
+          if (fs.existsSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "R-Portable"))) {
+            fs.rmSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "R-Portable"), {recursive: true})
+          }
+        }
+
+
+        untarAndUngzip(tempFilePath, tempFolder, arg.fileName, win, arg.appFolder)
+      })
+    })
+  })
 } catch (e) {
   // Catch Error
   // throw e;
+}
+
+
+async function copyDirectoryContents(src: string, dest: string) {
+  if (!fs.existsSync(src)) {
+    throw new Error(`Source directory ${src} does not exist`);
+  }
+
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+
+  try {
+    if (platform() === 'win32') {
+      // Use robocopy on Windows
+      await child_process.exec(`xcopy "${src}" "${dest}" /s /e /h /y /q`);
+    } else {
+      // Use cp on Unix-like platforms
+      await child_process.exec(`cp -rf "${src}/." "${dest}/"`);
+    }
+  } catch (e: any) {
+    throw new Error(`Error copying directory contents: ${e.message}`);
+  }
+
+}
+
+
+function untarAndUngzip(tempFilePath: string, tempFolder: string, fileName: string, win: BrowserWindow | null, appFolder: string) {
+  const extract = tar.extract();
+  const gunzip = zlib.createGunzip();
+  fs.createReadStream(tempFilePath).pipe(gunzip).pipe(extract);
+  let totalEntries = 0;
+  let processedEntries = 0;
+
+  extract.on('entry', (header: any, stream: any, next: any) => {
+    totalEntries++;
+    const filePath = path.join(tempFolder, header.name);
+    if (header.type === 'directory') {
+      if (!fs.existsSync(filePath)) {
+        fs.mkdirSync(filePath, { recursive: true });
+      }
+      processedEntries++;
+      const progress = (processedEntries / totalEntries) * 100;
+      win?.webContents.send('download-extra-message', { total: totalEntries, progress: processedEntries, fileName, completed: false, percentage: progress, message: `Extracting ${fileName}`, file: filePath });
+      next();
+    } else if (header.type === 'symlink') {
+      fs.symlinkSync(header.linkname, filePath);
+      processedEntries++;
+      const progress = (processedEntries / totalEntries) * 100;
+      win?.webContents.send('download-extra-message', { total: totalEntries, progress: processedEntries, fileName, completed: false, percentage: progress, message: `Extracting ${fileName}`, file: filePath });
+      next();
+    } else {
+      const dirPath = path.dirname(filePath);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      const writeStream = fs.createWriteStream(filePath);
+      stream.pipe(writeStream);
+      stream.on('end', () => {
+        processedEntries++;
+        const progress = (processedEntries / totalEntries) * 100;
+        win?.webContents.send('download-extra-message', { total: totalEntries, progress: processedEntries, fileName, completed: false, percentage: progress, message: `Extracting ${fileName}`, file: filePath });
+        next();
+      });
+      stream.resume();
+    }
+  });
+
+  extract.on('finish', () => {
+    fs.unlinkSync(tempFilePath);
+    win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: true, percentage: 100, message: `Extracting ${fileName}`, file: null})
+    if (fileName.startsWith("python")) {
+      win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: false, percentage: 0, message: `Removing existing environment`, file: null})
+      if (fs.existsSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "python"))) {
+        fs.rmSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "python"), {recursive: true})
+      }
+      fs.mkdirSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "python"), {recursive: true})
+      win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: false, percentage: 0, message: `Moving new environment`, file: null})
+      copyDirectoryContents(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "python"), path.join(appFolder, "bin", translateOSPlatform(platform()), "python")).then(
+        () => {
+          //fs.rmSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "python"), {recursive: true})
+          win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: true, percentage: 100, message: `Finished`, file: null})
+        }
+      )
+    } else if (fileName.startsWith("r-portable")) {
+      win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: false, percentage: 0, message: `Removing existing environment`, file: null})
+      if (fs.existsSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "R-Portable"))){
+        fs.rmSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "R-Portable"), {recursive: true})
+      }
+      fs.mkdirSync(path.join(appFolder, "bin", translateOSPlatform(platform()), "R-Portable"), {recursive: true})
+      win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: false, percentage: 0, message: `Moving new environment`, file: null})
+      copyDirectoryContents(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "R-Portable"), path.join(appFolder, "bin", translateOSPlatform(platform()), "R-Portable")).then(
+        () => {
+          //fs.rmSync(path.join(tempFolder, "resources", "bin", translateOSPlatform(platform()), "R-Portable"), {recursive: true})
+          win?.webContents.send('download-extra-message', {total: totalEntries, progress: processedEntries, fileName: fileName, completed: true, percentage: 100, message: `Finished`, file: null})
+        }
+      )
+    }
+    win?.webContents.send('download-extra-message', { total: totalEntries, progress: processedEntries, fileName, completed: true, percentage: 100, message: `Extracting ${fileName}`, file: null });
+  });
 }

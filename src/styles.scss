@@ -33,3 +33,20 @@ html, body { height: 100vh; width: 100vw; margin: 0 }
 
 
 @import "../node_modules/bootstrap-icons/font/bootstrap-icons";
+
+.terminal {
+  background-color: #000;
+  color: #ecb883;
+  padding: 10px;
+  height: 200px;
+  overflow-y: auto;
+  border: 1px solid #333;
+  margin-top: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+.terminal pre {
+  white-space: pre-wrap; /* This will wrap long lines */
+  word-break: break-word; /* This will break words if necessary */
+}

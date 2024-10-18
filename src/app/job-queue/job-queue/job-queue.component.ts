@@ -3,7 +3,7 @@ import {DataStorageSettingsComponent} from "../../settings/data-storage-settings
 import {ElectronService} from "../../core/services";
 import {JobQueueService} from "../job-queue.service";
 import {Job} from "embedded-queue";
-import {NgClass} from "@angular/common";
+import {DatePipe, NgClass} from "@angular/common";
 import {NgbModal, NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {PcaPlotModalComponent} from "../../modals/pca-plot-modal/pca-plot-modal.component";
 import {PhatePlotModalComponent} from "../../modals/phate-plot-modal/phate-plot-modal.component";
@@ -30,7 +30,8 @@ import {
     NgClass,
     NgbProgressbar,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DatePipe
   ],
   templateUrl: './job-queue.component.html',
   styleUrl: './job-queue.component.scss'
@@ -62,6 +63,8 @@ export class JobQueueComponent {
     jobSearch: new FormControl("")
   })
 
+  terminalMessages: {jobId: string, data: string, type: "message"|"error", time: Date}[] = []
+
   displayJob: {completed: boolean, job: any, error: boolean, type: string, name?: string}[] = []
 
   constructor(private zone: NgZone, private jobQueue: JobQueueService, private electronService: ElectronService, private modal : NgbModal, private fb: FormBuilder) {
@@ -81,6 +84,12 @@ export class JobQueueComponent {
       }
       console.log(this.displayJob)
 
+    })
+    this.jobQueue.jobTerminalSubject.asObservable().subscribe((value) => {
+      this.terminalMessages = [value, ...this.terminalMessages]
+      if (this.terminalMessages.length > 100) {
+        this.terminalMessages.shift()
+      }
     })
   }
 

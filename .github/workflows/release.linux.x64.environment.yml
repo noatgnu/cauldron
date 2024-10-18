@@ -125,7 +125,7 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: python.tar.gz
-          asset_name: python-linux-x64-extra.tar.gz
+          asset_name: python-linux-x86_64-extra.tar.gz
           asset_content_type: application/tar+gzip
 
       - name: Upload R-Portable Archive
@@ -135,5 +135,5 @@ jobs:
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: r-portable.tar.gz
-          asset_name: r-portable-linux-x64-extra.tar.gz
+          asset_name: r-portable-linux-x86_64-extra.tar.gz
           asset_content_type: application/tar+gzip

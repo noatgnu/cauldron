@@ -5,6 +5,7 @@ import {Accession, Parser} from "uniprotparserjs";
 import {DataFrame, fromCSV, IDataFrame, ISeries, Series} from "data-forge";
 import {ToastService} from "../toast-container/toast.service";
 import {Subject} from "rxjs";
+import {Options} from "python-shell";
 
 
 @Injectable({
@@ -19,6 +20,7 @@ export class JobQueueService {
   completedCount = 0
   errorCount: number = 0
   settings = this.electronService.settings;
+  jobTerminalSubject: Subject<{jobId: string, data: string, type: "message"|"error", time: Date}> = new Subject<{jobId: string, data: string, type: "message"|"error", time: Date}>()
   constructor(private electronService: ElectronService, private toastService: ToastService, private zone: NgZone) {
     this.createJobQueue().then(() => {
       console.log("Job Queue Created")
@@ -582,11 +584,11 @@ export class JobQueueService {
             options_alpha.args.push("--batch_correction")
           }
           console.log(options_alpha.args)
-          await this.electronService.pythonShell.run([
+          await this.runPythonScript([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "alphapept_process.py"
-          ].join(this.electronService.path.sep), options_alpha)
+          ].join(this.electronService.path.sep), options_alpha, job)
           break
       }
     }, 1)
@@ -696,11 +698,11 @@ export class JobQueueService {
 
           console.log(options_cm.args)
           await job.setProgress(50, 100)
-          await this.electronService.pythonShell.run([
+          await this.runPythonScript([
             this.electronService.resourcePath.replace(this.electronService.path.sep+ "app.asar", ""),
             "scripts",
             "get_coverage.py"
-          ].join(this.electronService.path.sep), options_cm)
+          ].join(this.electronService.path.sep), options_cm, job)
           await job.setProgress(100, 100)
           break
       }
@@ -713,5 +715,26 @@ export class JobQueueService {
 
   saveJobQueue() {
     this.electronService.saveJobQueue(this.jobMap)
+  }
+
+  async runPythonScript(cmd: string, options: Options, job: Job) {
+    return new Promise((resolve, reject) => {
+      const pyshell = new this.electronService.pythonShell(cmd, options);
+      pyshell.on('message', (message: any)=> {
+        this.jobTerminalSubject.next({jobId: job.id, data: message, type: "message", time: new Date()})
+      });
+      pyshell.on('stderr', (stderr: any)=> {
+        console.error(`Error: ${stderr}`);
+        this.jobTerminalSubject.next({jobId: job.id, data: stderr, type: "error", time: new Date()})
+      })
+      pyshell.on('close', (code: any) => {
+
+        if (code === 0 || code === undefined) {
+          resolve('Script finished successfully');
+        } else {
+          reject(new Error(`Script finished with code ${code}`));
+        }
+      });
+    })
   }
 }

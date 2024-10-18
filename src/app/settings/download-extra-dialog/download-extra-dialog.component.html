@@ -1,0 +1,68 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    Download Extra Environment
+  </h5>
+</div>
+<div class="modal-body">
+  <form [formGroup]="form" class="d-flex flex-column gap-2">
+    <div class="form-group">
+      <label for="operating_platform">
+        Operating Platform
+      </label>
+      <select class="form-control" id="operating_platform" formControlName="platform">
+        <option value="linux">Linux</option>
+        <option value="win">Windows</option>
+        <option value="darwin">Mac M1</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="arch">
+        Architecture
+      </label>
+      <select class="form-control" id="arch" formControlName="arch">
+        @if (form.value.platform === "darwin") {
+          <option value="arm64">ARM64</option>
+        } @if (form.value.platform === "linux") {
+          <option value="x86_64">x86_64</option>
+          <option value="arm64">ARM64</option>
+        } @if (form.value.platform === "win") {
+          <option value="x86_64">x86_64</option>
+        }
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="url">
+        Download URL
+      </label>
+      <input type="text" class="form-control" id="url" formControlName="url" readonly>
+    </div>
+  </form>
+  <div class="mt-2">
+    <button type="button" class="btn btn-primary" (click)="download()" [disabled]="downloading">Download</button>
+  </div>
+  <div class="terminal">
+    @for (m of messages; track messages) {
+      <pre>{{ m }}</pre>
+      @if (m.startsWith("Downloading")) {
+        @if (progressMap[m]) {
+          <ngb-progressbar [value]="progressMap[m]" [showValue]="true"></ngb-progressbar>
+        }
+      } @else if (m.startsWith("Extracting")) {
+        @if (progressMap[m]) {
+          <pre>Entries: {{progressMap[m]}}</pre>
+        }
+      } @else if (m === "Finished") {
+        <pre>Finished</pre>
+      } @else if (m.startsWith("Removing")) {
+        <pre>{{m}}</pre>
+      } @else if (m.startsWith("Error")) {
+        <pre>{{m}}</pre>
+      } @else {
+        <pre>{{m}}</pre>
+      }
+    }
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+</div>

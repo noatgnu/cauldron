@@ -2,7 +2,8 @@ import {Component, EventEmitter, NgZone, Output} from '@angular/core';
 import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
 import {SharedModule} from "../../shared/shared.module";
 import {ElectronService} from "../../core/services";
-import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
+import {DownloadExtraDialogComponent} from "../download-extra-dialog/download-extra-dialog.component";
 
 @Component({
   selector: 'app-python-settings',
@@ -24,7 +25,7 @@ export class PythonSettingsComponent {
   pipList: {name: string, version: string}[] = []
   installProcess: string = ''
   @Output() changed: EventEmitter<boolean> = new EventEmitter<boolean>()
-  constructor(private fb: FormBuilder, public electronService: ElectronService, private zone: NgZone) {
+  constructor(private modal: NgbModal, private fb: FormBuilder, public electronService: ElectronService, private zone: NgZone) {
     if (this.electronService.pythonPath) {
       this.form.controls['python_path'].setValue(this.electronService.pythonPath)
       this.getPipList()
@@ -83,5 +84,13 @@ export class PythonSettingsComponent {
   saveSettings() {
     this.changed.emit(true)
 
+  }
+
+  downloadEnvironmentDialog() {
+    const ref = this.modal.open(DownloadExtraDialogComponent, {scrollable: true})
+    ref.componentInstance.environment = "python"
+    ref.dismissed.subscribe(() => {
+      this.getPipList()
+    })
   }
 }

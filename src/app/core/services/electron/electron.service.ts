@@ -17,13 +17,15 @@ import {platform, arch} from "os";
 import {Options, PythonShell} from "python-shell";
 import * as child_process from "child_process";
 import {Job} from "embedded-queue";
-import * as axios from "axios";
-
+import axios from "axios";
+import * as https from "https";
+import * as tar from "tar";
 @Injectable({
   providedIn: 'root'
 })
 export class ElectronService {
-
+  tar!: typeof tar;
+  https!: typeof https;
   ipcRenderer!: typeof ipcRenderer;
   webFrame!: typeof webFrame;
   childProcess!: typeof childProcess;
@@ -73,11 +75,14 @@ export class ElectronService {
   defaultPythonPath: string = ""
 
   linkDataSubject: BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}> = new BehaviorSubject<{step: number, folder: number, token: string, baseURL: string, name: string, session: string}>({step: 0, folder: 0, token: "", baseURL: "", name: "", session: ""})
-
+  appVersion: string = ""
+  downloadExtraMessageSubject: Subject<{total: number, progress: number, fileName: string, completed: boolean, percentage: number, message: string, file: string|null}> = new Subject()
 
   constructor() {
     // Conditional imports
     if (this.isElectron) {
+      this.tar = (window as any).require('tar');
+      this.https = (window as any).require('https');
       this.ipcRenderer = (window as any).require('electron').ipcRenderer;
       this.webFrame = (window as any).require('electron').webFrame;
       this.dialog = (window as any).require('@electron/remote').dialog;
@@ -93,6 +98,7 @@ export class ElectronService {
       this.child_process = (window as any).require('child_process');
       this.pythonShell = (window as any).require('python-shell').PythonShell;
       this.translatedPlatform = this.translatePlatform(this.platform())
+      this.arch = (window as any).require('os').arch;
       this.childProcess.exec('node -v', (error, stdout, stderr) => {
         if (error) {
           console.error(`error: ${error.message}`);
@@ -117,9 +123,11 @@ export class ElectronService {
           if (this.arch() === 'arm64') {
             this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
             this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
+            this.defaultPythonPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "python", "bin", "python")
           } else {
             this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
             this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
+            this.defaultPythonPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "python", "bin", "python")
           }
           if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
             this.RPath = this.settings.RPath
@@ -128,10 +136,18 @@ export class ElectronService {
             this.RPath = this.defaultRPath
             this.RScriptPath = this.defaultRScriptPath
           }
+          if (this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
+            this.pythonPath = this.settings.pythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
+          } else {
+            this.pythonPath = this.defaultPythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
+          }
         } else if (this.platform() === 'win32') {
           this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin",this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "R.exe")
           this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "App", "R-Portable", "bin", "Rscript.exe")
-          if (!fs.existsSync(this.RPath)) {
+          this.defaultPythonPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "python", "python.exe")
+          if (!fs.existsSync(this.defaultRPath)) {
             this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R.exe")
             this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript.exe")
           }
@@ -142,15 +158,31 @@ export class ElectronService {
             this.RPath = this.defaultRPath
             this.RScriptPath = this.defaultRScriptPath
           }
+          if (this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
+            this.pythonPath = this.settings.pythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
+          } else {
+            this.pythonPath = this.defaultPythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
+          }
         } else if (this.platform() === 'linux') {
           this.defaultRPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "R")
           this.defaultRScriptPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "R-Portable", "bin", "Rscript")
+          this.defaultPythonPath = this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "bin", this.translatedPlatform,  "python", "bin", "python")
           if (this.settings.useSystemR && this.settings.RPath && this.settings.RPath !== "") {
             this.RPath = this.settings.RPath
             this.RScriptPath = this.RPath.replace(this.path.sep+"bin"+this.path.sep+"R", this.path.sep+"bin"+this.path.sep+"Rscript")
           } else {
             this.RPath = this.defaultRPath
             this.RScriptPath = this.defaultRScriptPath
+          }
+
+          if (this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
+            this.pythonPath = this.settings.pythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
+          } else {
+            this.pythonPath = this.defaultPythonPath
+            this.pythonOptions.pythonPath = this.pythonPath.slice()
           }
         }
       })
@@ -185,6 +217,9 @@ export class ElectronService {
       this.ipcRenderer.on('shutdown', (event, message) => {
         this.shutdownSubject.next(message as string)
       })
+      this.ipcRenderer.on('download-extra-message', (event, message) => {
+        this.downloadExtraMessageSubject.next(message as {total: number, progress: number, fileName: string, completed: boolean, percentage: number, message: string, file: string|null})
+      })
 
 
       this.ipcRenderer.on('link-data', (event, message) => {
@@ -196,10 +231,13 @@ export class ElectronService {
           console.log(e)
         }
       })
-
+      this.ipcRenderer.on('app-version', (event, message) => {
+        this.appVersion = message
+      })
+      this.ipcRenderer.send('get-app-version', 'version')
       this.ipcRenderer.send('get-link-data', 'link')
       this.ipcRenderer.send('get-process-resource-path', 'python')
-      this.ipcRenderer.on('python-path', (event, message) => {
+      /*this.ipcRenderer.on('python-path', (event, message) => {
         this.defaultPythonPath = message
         if (this.settings.useSystemPython && this.settings.pythonPath && this.settings.pythonPath !== "") {
           this.pythonPath = this.settings.pythonPath
@@ -219,7 +257,7 @@ export class ElectronService {
           }
         )
       })
-      this.ipcRenderer.send('get-python-path', 'python')
+      this.ipcRenderer.send('get-python-path', 'python')*/
 
       this.userDataPath = this.remote.app.getPath('userData');
       this.loadConfigSettings()
@@ -391,11 +429,37 @@ export class ElectronService {
     return null;
   }
 
-  async downloadAndSaveFile(url: string, folder: string) {
-    const client = new axios.Axios()
-    const response = await client.get(url, {responseType: 'stream'})
-    const fileName = url.split("/").pop()
-    const filePath = this.path.join(folder, fileName as string)
-    const writer = this.fs.createWriteStream(filePath)
+  async downloadAndSaveExtra(url: string, fileName: string) {
+    this.ipcRenderer.send('download-extra', {url: url, fileName: fileName, tempFolder: this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""), "temp"), appFolder: this.path.join(this.resourcePath.replace(this.path.sep + "app.asar", ""))})
   }
+
+  async getDownloadURL(platform: string, arch: string, version: string, environment: string) {
+    console.log(platform, arch, version, environment)
+    const url = `https://api.github.com/repos/noatgnu/cauldron/releases`
+    const response = await axios({
+      method: "get",
+      url: url,
+      headers: {
+        'accept': 'application/json',
+      }
+    })
+    const data: any[] = response.data
+    for (const d of data) {
+      if (d["tag_name"] === version) {
+        for (const a of d["assets"]) {
+          if (platform === "win") {
+            if (a["name"].includes(platform) && a["name"].includes(environment) && !a["name"].includes("darwin")) {
+              console.log(a.url)
+              return a.url
+            }
+          }
+          if (a["name"].includes(platform) && a["name"].includes(arch) && a["name"].includes(environment)) {
+            return a.url
+          }
+        }
+      }
+    }
+  }
+
+
 }

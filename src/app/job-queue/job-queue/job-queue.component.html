@@ -109,6 +109,13 @@
             }
 
           }
+          <div class="terminal">
+            @for (t of terminalMessages; track t) {
+              @if (t.jobId === clickedJob.job.id) {
+                <pre>[{{t.time | date: "short"}}] {{t.data}}</pre>
+              }
+            }
+          </div>
 
         </div>
       } @else {
@@ -124,4 +131,5 @@
 
     </div>
   </div>
+
 </div>

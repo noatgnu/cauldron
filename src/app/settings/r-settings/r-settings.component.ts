@@ -1,7 +1,8 @@
 import {Component, EventEmitter, NgZone, Output} from '@angular/core';
-import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
+import {NgbModal, NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {ElectronService} from "../../core/services";
+import {DownloadExtraDialogComponent} from "../download-extra-dialog/download-extra-dialog.component";
 
 @Component({
   selector: 'app-r-settings',
@@ -23,7 +24,7 @@ export class RSettingsComponent {
   packagesList: {name: string, version: string}[] = []
   processing: boolean = false
   @Output() changed: EventEmitter<boolean> = new EventEmitter<boolean>()
-  constructor(private fb: FormBuilder, private electronService: ElectronService, private zone: NgZone) {
+  constructor(private fb: FormBuilder, private modal: NgbModal, private electronService: ElectronService, private zone: NgZone) {
     if (this.electronService.RPath) {
       this.form.controls['r_path'].setValue(this.electronService.RPath)
       this.getPackageList()
@@ -69,5 +70,13 @@ export class RSettingsComponent {
 
   saveSettings() {
 
+  }
+
+  downloadEnvironmentDialog() {
+    const ref = this.modal.open(DownloadExtraDialogComponent, {scrollable: true})
+    ref.componentInstance.environment = "r-portable"
+    ref.dismissed.subscribe(() => {
+      this.getPackageList()
+    })
   }
 }
