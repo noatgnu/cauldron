@@ -21,6 +21,8 @@ export class DownloadExtraDialogComponent {
 
   @Input() set environment(value: string) {
     this._environment = value
+    // @ts-ignore
+    this.setURL(this.form.controls["platform"].value, this.form.controls["arch"].value)
   }
 
   get environment(): string {
@@ -68,6 +70,29 @@ export class DownloadExtraDialogComponent {
           this.downloading = false
           this.form.enable()
           this.messages.push(value.message)
+          if (this.form.value.platform === 'darwin') {
+            if (this.environment === "python") {
+              this.electronService.pythonPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "python", "bin", "python")
+            } else if (this.environment === "r-portable") {
+              this.electronService.RPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "R-Portable", "bin", "R")
+              this.electronService.RScriptPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "R-Portable", "bin", "Rscript")
+            }
+          } else if (this.form.value.platform === 'linux') {
+            if (this.environment === "python") {
+              this.electronService.pythonPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "linux",  "python", "bin", "python")
+            } else if (this.environment === "r-portable") {
+              this.electronService.RPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "linux",  "R-Portable", "bin", "R")
+              this.electronService.RScriptPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "linux",  "R-Portable", "bin", "Rscript")
+            }
+
+          } else if (this.form.value.platform === 'win') {
+            if (this.environment === "python") {
+              this.electronService.pythonPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "python", "python.exe")
+            } else if (this.environment === "r-portable") {
+              this.electronService.RPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "R-Portable", "bin", "R.exe")
+              this.electronService.RScriptPath = this.electronService.path.join(this.electronService.resourcePath.replace(this.electronService.path.sep + "app.asar", ""), "bin", "win",  "R-Portable", "bin", "Rscript.exe")
+            }
+          }
         })
       } else {
         if (value.message.startsWith("Downloading")) {

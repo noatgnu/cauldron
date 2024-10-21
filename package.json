@@ -1,7 +1,7 @@
 {
   "name": "cauldron",
   "description": "A UI package for local proteomics data visualization",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Toan K. Phung",
     "email": "toan.phungkhoiquoctoan@gmail.com"
