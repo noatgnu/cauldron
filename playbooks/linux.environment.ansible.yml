@@ -1,0 +1,135 @@
+- name: Build and release R and Python environment for Linux x64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Set up dependencies
+      apt:
+        update_cache: yes
+        name:
+          - xorg-dev
+          - gfortran
+          - libpng-dev
+          - libjpeg-dev
+          - liblzma-dev
+          - libpcre2-dev
+          - libcurl4-openssl-dev
+          - libharfbuzz-dev
+          - libfribidi-dev
+          - libx11-dev
+          - libxext-dev
+          - libxrender-dev
+          - libxtst-dev
+          - libcairo2-dev
+          - tcl-dev
+          - tk-dev
+          - libhdf5-dev
+          - libblosc-dev
+          - libhiredis-dev
+          - libopenmpi-dev
+          - liblzo2-dev
+          - libomp-dev
+          - libreadline-dev
+          - bzip2
+        state: present
+
+    - name: Compile R
+      environment:
+        CPPFLAGS: -I/usr/include -I/usr/include/xorg
+        LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+        CFLAGS: -I/usr/include
+        TCL_LIBRARY: /usr/lib/tcltk
+        TK_LIBRARY: /usr/lib/tcltk
+        PKG_CONFIG_PATH: /usr/lib/pkgconfig
+        C_INCLUDE_PATH: /usr/include
+        LIBRARY_PATH: /usr/lib
+      shell: |
+        curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+        tar -xzvf R-4.4.1.tar.gz
+        cd R-4.4.1
+        ./configure --prefix=/path/to/checkout/app/bin/linux/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk --with-mpi
+        make -j$(nproc)
+        make install
+
+    - name: List files in R-Portable
+      command: ls /path/to/checkout/app/bin/linux/R-Portable/
+
+    - name: Set up writable permissions for R library
+      file:
+        path: /path/to/checkout/app/bin/linux/R-Portable
+        recurse: yes
+        mode: '0777'
+
+    - name: Set up R R_LIBS_USER
+      lineinfile:
+        path: /etc/environment
+        line: 'R_LIBS_USER=/path/to/checkout/app/bin/linux/R-Portable/lib'
+
+    - name: Install R packages
+      environment:
+        CPPFLAGS: -I/usr/include -I/usr/include/xorg
+        LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+        CFLAGS: -I/usr/include
+        TCL_LIBRARY: /usr/lib/tcltk
+        TK_LIBRARY: /usr/lib/tcltk
+        PKG_CONFIG_PATH: /usr/lib/pkgconfig
+        C_INCLUDE_PATH: /usr/include
+        LIBRARY_PATH: /usr/lib
+        R_HOME: /path/to/checkout/app/bin/linux/R-Portable
+      command: /path/to/checkout/app/bin/linux/R-Portable/bin/Rscript /path/to/checkout/app/scripts/install_packages.R
+
+    - name: Download Portable Python
+      get_url:
+        url: https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+        dest: /path/to/checkout/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+
+    - name: Extract Python
+      unarchive:
+        src: /path/to/checkout/cpython-3.10.15+20241008-x86_64-unknown-linux-gnu-install_only.tar.gz
+        dest: /path/to/checkout/app/bin/linux
+        extra_opts: ["--no-same-owner", "--no-same-permissions"]
+
+    - name: List files in Python directory
+      command: ls /path/to/checkout/app/bin/linux
+
+    - name: Install Python packages
+      environment:
+        CPPFLAGS: -I/usr/include -I/usr/include/xorg
+        LDFLAGS: -L/usr/lib -L/usr/lib/xorg
+        CFLAGS: -I/usr/include
+        TCL_LIBRARY: /usr/lib/tcltk
+        TK_LIBRARY: /usr/lib/tcltk
+        PKG_CONFIG_PATH: /usr/lib/pkgconfig
+        C_INCLUDE_PATH: /usr/include
+        LIBRARY_PATH: /usr/lib
+        R_HOME: /path/to/checkout/app/bin/linux/R-Portable
+      command: /path/to/checkout/app/bin/linux/python/bin/python3 -m pip install -r /path/to/checkout/app/requirements.txt
+
+    - name: Rename app to resources
+      command: mv /path/to/checkout/app /path/to/checkout/resources
+
+    - name: Compress Python directory
+      archive:
+        path: /path/to/checkout/resources/bin/linux/python
+        dest: /path/to/checkout/python.tar.gz
+        format: gz
+
+    - name: Compress R-Portable directory
+      archive:
+        path: /path/to/checkout/resources/bin/linux/R-Portable
+        dest: /path/to/checkout/r-portable.tar.gz
+        format: gz
+
+    - name: Upload Python Archive
+      ansible.builtin.copy:
+        src: /path/to/checkout/python.tar.gz
+        dest: /remote/path/python-linux-x86_64-extra.tar.gz
+
+    - name: Upload R-Portable Archive
+      ansible.builtin.copy:
+        src: /path/to/checkout/r-portable.tar.gz
+        dest: /remote/path/r-portable-linux-x86_64-extra.tar.gz

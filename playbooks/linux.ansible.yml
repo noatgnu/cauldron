@@ -1,0 +1,82 @@
+- name: Build and Release Electron App For Linux x64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Install dependencies
+      apt:
+        update_cache: yes
+        name:
+          - libopenjp2-tools
+          - build-essential
+          - libreadline-dev
+          - libx11-dev
+          - libxt-dev
+          - libpng-dev
+          - libjpeg-dev
+          - libcairo2-dev
+          - libbz2-dev
+          - libzstd-dev
+          - liblzma-dev
+          - libcurl4-openssl-dev
+          - libssl-dev
+          - libxml2-dev
+          - gfortran
+        state: present
+
+    - name: Set up Python 3.10
+      community.general.python:
+        version: '3.10'
+        state: present
+
+    - name: Set up Node.js
+      community.general.npm:
+        version: '18'
+        state: present
+
+    - name: Install npm dependencies
+      command: npm install --force
+      args:
+        chdir: /path/to/checkout
+
+    - name: Build without extra
+      command: >
+        npm run build:prod &&
+        npx electron-builder build -l --x64 --arm64 --publish=never
+      args:
+        chdir: /path/to/checkout
+
+    - name: Get version from package.json
+      shell: "node -p -e \"require('./package.json').version\""
+      args:
+        chdir: /path/to/checkout
+      register: version_output
+
+    - name: List files
+      command: ls release/
+      args:
+        chdir: /path/to/checkout
+
+    - name: Upload Release Asset Linux tar.gz (ARM64)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-arm64.tar.gz
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-linux-arm64-no-extra.tar.gz
+
+    - name: Upload Release Asset Linux tar.gz (x64)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}.tar.gz
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-linux-x64-no-extra.tar.gz
+
+    - name: Upload Release Asset Linux AppImage (ARM64)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-arm64.AppImage
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-linux-arm64-no-extra.AppImage
+
+    - name: Upload Release Asset Linux AppImage (x64)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}.AppImage
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-linux-x86_64-no-extra.AppImage

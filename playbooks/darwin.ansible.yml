@@ -1,0 +1,50 @@
+- name: Build and Release Electron App For MacOS aarch64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Set up Node.js
+      community.general.homebrew:
+        name: node
+        state: present
+        version: '18'
+
+    - name: Install npm dependencies
+      command: npm install --force
+      args:
+        chdir: /path/to/checkout
+
+    - name: Build Electron app
+      command: >
+        npm run build:prod &&
+        npx electron-builder build --mac --arm64 --publish=never
+      args:
+        chdir: /path/to/checkout
+
+    - name: List files in release directory
+      command: ls /path/to/checkout/release
+
+    - name: Get version from package.json
+      shell: "node -p -e \"require('./package.json').version\""
+      args:
+        chdir: /path/to/checkout
+      register: version_output
+
+    - name: Upload Release Asset (dmg)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-arm64.dmg
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-darwin-arm64-no-extra.dmg
+
+    - name: Upload Release Asset (dmg blockmap)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-arm64.dmg.blockmap
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-darwin-arm64-no-extra.dmg.blockmap
+
+    - name: Upload Release Asset (tar.gz)
+      ansible.builtin.copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-arm64-mac.tar.gz
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-darwin-arm64-no-extra.tar.gz

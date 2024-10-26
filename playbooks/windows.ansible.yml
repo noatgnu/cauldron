@@ -1,0 +1,51 @@
+- name: Build and Release Electron App For Windows x64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Set up Python 3.10
+      win_chocolatey:
+        name: python
+        version: '3.10.0'
+        state: present
+
+    - name: Set up Node.js
+      win_chocolatey:
+        name: nodejs
+        version: '18.0.0'
+        state: present
+
+    - name: Install dependencies
+      win_command: npm install --force
+      args:
+        chdir: /path/to/checkout
+
+    - name: Build without extra
+      win_command: npm run electron:build
+      args:
+        chdir: /path/to/checkout
+
+    - name: Get version from package.json
+      win_shell: |
+        $version = (Get-Content -Path /path/to/checkout/package.json | ConvertFrom-Json).version
+        Write-Output $version
+      register: version_output
+
+    - name: Upload Release Asset Win tar.gz
+      win_copy:
+        src: /path/to/checkout/release/cauldron-{{ version_output.stdout }}-win.tar.gz
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-win-x86_64-no-extra.tar.gz
+
+    - name: Upload Release Asset Win NSIS
+      win_copy:
+        src: /path/to/checkout/release/cauldron-Setup-{{ version_output.stdout }}.exe
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-win-x86_64-no-extra.exe
+
+    - name: Upload Release Asset Win NSIS blockmap
+      win_copy:
+        src: /path/to/checkout/release/cauldron-Setup-{{ version_output.stdout }}.exe.blockmap
+        dest: /remote/path/cauldron-{{ version_output.stdout }}-win-x86_64-no-extra.exe.blockmap

@@ -1,0 +1,77 @@
+- name: Build and Release R and Python-Portable For Windows x64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Set up Python 3.10
+      win_chocolatey:
+        name: python
+        version: '3.10.0'
+        state: present
+
+    - name: Set up Node.js
+      win_chocolatey:
+        name: nodejs
+        version: '18.0.0'
+        state: present
+
+    - name: Get version from package.json
+      win_shell: |
+        $version = (Get-Content -Path /path/to/checkout/package.json | ConvertFrom-Json).version
+        Write-Output $version
+      register: version_output
+
+    - name: Install R
+      win_shell: |
+        Invoke-WebRequest -Uri https://cran.r-project.org/bin/windows/base/old/4.4.1/R-4.4.1-win.exe -OutFile R-Portable.exe
+        New-Item -ItemType Directory -Force -Path /path/to/checkout/app/bin/win/R-Portable
+        Start-Process -FilePath R-Portable.exe -ArgumentList "/VERYSILENT", "/DIR=/path/to/checkout/app/bin/win/R-Portable" -Wait
+
+    - name: Install R packages
+      win_environment:
+        R_LIBS_USER: '{{ lookup("env", "WORKSPACE") }}/app/bin/win/R-Portable/library'
+      win_command: Rscript app/scripts/install_packages.R
+      args:
+        chdir: /path/to/checkout
+
+    - name: Download standalone Python 3.10
+      win_shell: |
+        Invoke-WebRequest -Uri https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13+20240107-x86_64-pc-windows-msvc-shared-install_only.tar.gz -OutFile python-3.10.13-standalone.tar.gz
+        New-Item -ItemType Directory -Force -Path /path/to/checkout/app/bin/win/python
+        tar -xzf python-3.10.13-standalone.tar.gz -C /path/to/checkout/app/bin/win
+
+    - name: Install Python packages
+      win_environment:
+        R_HOME: '{{ lookup("env", "WORKSPACE") }}/app/bin/win/R-Portable'
+      win_command: cmd /c '{{ lookup("env", "WORKSPACE") }}/app/bin/win/python/python.exe -m pip install -r app/requirements.txt'
+      args:
+        chdir: /path/to/checkout
+
+    - name: Rename app to resources
+      win_command: mv app resources
+      args:
+        chdir: /path/to/checkout
+
+    - name: Compress Python directory
+      win_command: tar -czf python.tar.gz resources/bin/win/python
+      args:
+        chdir: /path/to/checkout
+
+    - name: Compress R-Portable directory
+      win_command: tar -czf r-portable.tar.gz resources/bin/win/R-Portable
+      args:
+        chdir: /path/to/checkout
+
+    - name: Upload Python Archive
+      win_copy:
+        src: /path/to/checkout/python.tar.gz
+        dest: /remote/path/python-win-x86_64-extra.tar.gz
+
+    - name: Upload R-Portable Archive
+      win_copy:
+        src: /path/to/checkout/r-portable.tar.gz
+        dest: /remote/path/r-portable-win-x86_64-extra.tar.gz

@@ -1,0 +1,134 @@
+- name: Build and release R and Python environment for macOS arm64
+  hosts: localhost
+  tasks:
+    - name: Checkout repository
+      git:
+        repo: 'https://github.com/noatgnu/cauldron.git'
+        dest: /path/to/checkout
+        version: master
+
+    - name: Set up Homebrew
+      shell: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || true
+        echo "/opt/homebrew/bin" >> /etc/paths
+
+    - name: Install dependencies
+      shell: |
+        brew update
+        brew install --cask xquartz
+        brew install gfortran pkg-config libpng jpeg xz pcre2 curl harfbuzz fribidi libx11 libxext libxrender libxtst cairo tcl-tk hdf5 c-blosc hiredis open-mpi lzo bzip2
+        echo "$(brew --prefix gcc)/bin" >> /etc/paths
+        echo "/opt/homebrew/opt/jpeg/bin" >> /etc/paths
+        echo "/opt/homebrew/opt/open-mpi/bin" >> /etc/paths
+        echo "$(brew --prefix hdf5)/bin" >> /etc/paths
+        echo "$(brew --prefix lzo)/bin" >> /etc/paths
+        echo "$(brew --prefix c-blosc)/bin" >> /etc/paths
+        echo "$(brew --prefix bzip2)/bin" >> /etc/paths
+
+    - name: Compile R
+      environment:
+        CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+        LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
+        LZO_DIR: "{{ lookup('pipe', 'brew --prefix lzo') }}"
+        BZIP2_DIR: "{{ lookup('pipe', 'brew --prefix bzip2') }}"
+        BLOSC_DIR: "{{ lookup('pipe', 'brew --prefix c-blosc') }}"
+        HDF5_DIR: "{{ lookup('pipe', 'brew --prefix hdf5') }}"
+        CFLAGS: -I/opt/homebrew/opt/lzo/include
+        TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
+        C_INCLUDE_PATH: /opt/homebrew/Cellar/lzo/2.10/include/lzo:/opt/homebrew/Cellar/lzo/2.10/include/
+        LIBRARY_PATH: /opt/homebrew/lib
+      shell: |
+        curl -O https://cran.r-project.org/src/base/R-4/R-4.4.1.tar.gz
+        tar -xzvf R-4.4.1.tar.gz
+        cd R-4.4.1
+        ./configure --prefix=/path/to/checkout/app/bin/darwin/R-Portable/ --enable-R-shlib --with-blas --with-lapack --with-tcltk --with-mpi
+        make -j$(sysctl -n hw.ncpu)
+        make install
+
+    - name: List files in R-Portable
+      command: ls /path/to/checkout/app/bin/darwin/R-Portable/
+
+    - name: Set up writable permissions for R library
+      file:
+        path: /path/to/checkout/app/bin/darwin/R-Portable
+        recurse: yes
+        mode: '0777'
+
+    - name: Set up R R_LIBS_USER
+      lineinfile:
+        path: /etc/environment
+        line: 'R_LIBS_USER=/path/to/checkout/app/bin/darwin/R-Portable/lib'
+
+    - name: Install R packages
+      environment:
+        CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+        LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
+        LZO_DIR: "{{ lookup('pipe', 'brew --prefix lzo') }}"
+        BZIP2_DIR: "{{ lookup('pipe', 'brew --prefix bzip2') }}"
+        BLOSC_DIR: "{{ lookup('pipe', 'brew --prefix c-blosc') }}"
+        HDF5_DIR: "{{ lookup('pipe', 'brew --prefix hdf5') }}"
+        CFLAGS: -I/opt/homebrew/opt/lzo/include
+        TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
+        C_INCLUDE_PATH: /opt/homebrew/Cellar/lzo/2.10/include/lzo:/opt/homebrew/Cellar/lzo/2.10/include/
+        LIBRARY_PATH: /opt/homebrew/lib
+        R_HOME: /path/to/checkout/app/bin/darwin/R-Portable
+      command: /path/to/checkout/app/bin/darwin/R-Portable/bin/Rscript /path/to/checkout/app/scripts/install_packages.R
+
+    - name: Download Portable Python
+      get_url:
+        url: https://github.com/indygreg/python-build-standalone/releases/download/20241008/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
+        dest: /path/to/checkout/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
+
+    - name: Extract Python
+      unarchive:
+        src: /path/to/checkout/cpython-3.10.15+20241008-aarch64-apple-darwin-install_only.tar.gz
+        dest: /path/to/checkout/app/bin/darwin
+        extra_opts: ["--no-same-owner", "--no-same-permissions"]
+
+    - name: List files in Python directory
+      command: ls /path/to/checkout/app/bin/darwin
+
+    - name: Install Python packages
+      environment:
+        CPPFLAGS: -I/opt/homebrew/include -I/opt/X11/include -I/opt/homebrew/opt/jpeg/include -I/opt/homebrew/include
+        LDFLAGS: -L/opt/X11/lib -L/opt/homebrew/opt/jpeg/lib -L/opt/homebrew/opt/lzo/lib -L/opt/homebrew/lib
+        LZO_DIR: /opt/homebrew/opt/lzo
+        CFLAGS: -I/opt/homebrew/opt/lzo/include
+        TCL_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        TK_LIBRARY: /opt/homebrew/opt/tcl-tk/lib
+        PKG_CONFIG_PATH: /opt/homebrew/opt/jpeg/lib/pkgconfig
+        HDF5_DIR: /opt/homebrew/opt/hdf5
+        BLOSC_DIR: /opt/homebrew/opt/c-blosc
+        C_INCLUDE_PATH: /opt/homebrew/Cellar/lzo/2.10/include/lzo:/opt/homebrew/Cellar/lzo/2.10/include/
+        LIBRARY_PATH: /opt/homebrew/lib
+        R_HOME: /path/to/checkout/app/bin/darwin/R-Portable
+      command: /path/to/checkout/app/bin/darwin/python/bin/python3 -m pip install -r /path/to/checkout/app/requirements.txt
+
+    - name: Rename app to resources
+      command: mv /path/to/checkout/app /path/to/checkout/resources
+
+    - name: Compress Python directory
+      archive:
+        path: /path/to/checkout/resources/bin/darwin/python
+        dest: /path/to/checkout/python.tar.gz
+        format: gz
+
+    - name: Compress R-Portable directory
+      archive:
+        path: /path/to/checkout/resources/bin/darwin/R-Portable
+        dest: /path/to/checkout/r-portable.tar.gz
+        format: gz
+
+    - name: Upload Python Archive
+      ansible.builtin.copy:
+        src: /path/to/checkout/python.tar.gz
+        dest: /remote/path/python-darwin-arm64-extra.tar.gz
+
+    - name: Upload R-Portable Archive
+      ansible.builtin.copy:
+        src: /path/to/checkout/r-portable.tar.gz
+        dest: /remote/path/r-portable-darwin-arm64-extra.tar.gz
