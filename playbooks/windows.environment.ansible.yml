@@ -1,3 +1,4 @@
+---
 - name: Build and Release R and Python-Portable For Windows x64
   hosts: localhost
   tasks:

@@ -1,3 +1,4 @@
+---
 - name: Build and Release Electron App For Windows x64
   hosts: localhost
   tasks:

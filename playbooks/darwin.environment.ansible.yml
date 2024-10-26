@@ -1,3 +1,4 @@
+---
 - name: Build and release R and Python environment for macOS arm64
   hosts: localhost
   tasks:

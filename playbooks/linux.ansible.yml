@@ -1,3 +1,4 @@
+---
 - name: Build and Release Electron App For Linux x64
   hosts: localhost
   tasks:
