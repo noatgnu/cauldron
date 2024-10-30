@@ -27,10 +27,10 @@ def process_data(df, columns_prefix, categories, match_value, fold_enrichment_co
     result[organelle_col] = pd.Categorical(result[organelle_col], categories, ordered=True)
     return result
 
-def plot_data(result, fold_enrichment_col, organelle_col, comparison_col):
+def plot_data(result, fold_enrichment_col, organelle_col, comparison_col, colors, figsize):
     sns.set(font="Arial")
-    sns.set(rc={'figure.figsize': (6, 10)})
-    sns.set_style("white")
+    sns.set(rc={'figure.figsize': figsize})
+    sns.set_style("whitegrid")  # GraphPad Prism style
 
     if comparison_col and comparison_col in result.columns:
         grouped = result.groupby(comparison_col)
@@ -39,7 +39,7 @@ def plot_data(result, fold_enrichment_col, organelle_col, comparison_col):
 
     for i, data in grouped:
         plt.cla()
-        g = sns.violinplot(data=data, y=organelle_col, x=fold_enrichment_col, orient="h", hue=organelle_col)
+        g = sns.violinplot(data=data, y=organelle_col, x=fold_enrichment_col, orient="h", hue=organelle_col, palette=colors)
         sns.stripplot(data=data, y=organelle_col, x=fold_enrichment_col, orient="h", linewidth=1, color="#ebebeb", alpha=0.2)
         fig = g.get_figure()
         fig.tight_layout()
@@ -59,12 +59,17 @@ def plot_data(result, fold_enrichment_col, organelle_col, comparison_col):
 @click.option('--fold_enrichment_col', default='Fold enrichment', help='Name of the column for fold enrichment.')
 @click.option('--organelle_col', default='Organelle', help='Name of the column for organelle.')
 @click.option('--comparison_col', default='Comparison', help='Name of the column for comparison. Set to "" to make it optional.', required=False)
-def main(file_path, columns_prefix, categories, match_value, fold_enrichment_col, organelle_col, comparison_col):
+@click.option('--colors', default='C..Lysosome:#ffb3ba,C..Mitochondira:#ffdfba,Endosome:#ffffba,Golgi:#baffc9,ER:#bae1ff,Ribosome:#d7baff,Nuclear:#ffbaff', 
+              help='Comma-separated list of colors for each category in the format category:color.')
+@click.option('--figsize', default='6,10', help='Figure size in inches, in the format width,height.')
+def main(file_path, columns_prefix, categories, match_value, fold_enrichment_col, organelle_col, comparison_col, colors, figsize):
     categories_list = categories.split(',')
     comparison_col = comparison_col if comparison_col else None
+    colors_dict = dict(item.split(":") for item in colors.split(","))
+    figsize_tuple = tuple(map(int, figsize.split(',')))
     df = load_data(file_path)
     result = process_data(df, columns_prefix, categories_list, match_value, fold_enrichment_col, organelle_col, comparison_col)
-    plot_data(result, fold_enrichment_col, organelle_col, comparison_col)
+    plot_data(result, fold_enrichment_col, organelle_col, comparison_col, colors_dict, figsize_tuple)
 
 if __name__ == '__main__':
     main()
